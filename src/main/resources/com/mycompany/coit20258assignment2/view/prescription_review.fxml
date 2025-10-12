@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mycompany.coit20258assignment2.PrescriptionReviewController"
+      spacing="16" alignment="TOP_LEFT" prefWidth="980" prefHeight="640"
+      styleClass="page-root">
+
+    <HBox alignment="CENTER_LEFT" spacing="10" maxWidth="800">
+        <Button text="← Back" onAction="#onBack" styleClass="btn-secondary"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="message" text=""/>
+    </HBox>
+
+    <Label text="Review / Approve / Refill Prescriptions" styleClass="title"/>
+
+    <HBox spacing="12" alignment="CENTER" maxWidth="800">
+        <Label text="Prescription ID:"/>
+        <TextField fx:id="rxIdField" promptText="Select a row or paste ID" prefWidth="320"/>
+        <Button text="Approve" onAction="#onApprove" styleClass="btn-accent"/>
+        <Button text="Refill"  onAction="#onRefill"  styleClass="btn-primary"/>
+    </HBox>
+
+    <ListView fx:id="list" prefWidth="800" prefHeight="420"/>
+</VBox>

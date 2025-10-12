@@ -1,0 +1,186 @@
+/* ===========================================================================
+   Telehealth UI – polished theme + clear button categories
+   This file is globally attached by SceneNavigator.
+   =========================================================================== */
+
+/* --------- Design tokens (JavaFX CSS lookups) --------- */
+.root {
+    -fx-font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 15px;
+    -fx-font-smoothing-type: lcd;
+
+    /* App background */
+    -fx-background-color: linear-gradient(to bottom, #f7fbff 0%, #eef4ff 100%);
+
+    /* Color lookups */
+    -color-text:   #0f172a;
+    -color-muted:  #475569;
+    -color-line:   #d8e1f0;
+
+    -surface:   #ffffff;
+    -surface-2: #f7f9ff;
+
+    -primary:   #2563eb;   /* blue */
+    -primary-2: #1d4ed8;
+
+    -secondary:  #6b7a90;  /* slate */
+    -secondary-2:#5c6a82;
+
+    -accent:   #2da44e;    /* green */
+    -accent-2: #268a42;
+
+    -danger:   #d32f2f;    /* red */
+    -danger-2: #b71c1c;
+
+    /* Shadows */
+    -shadow-1: rgba(16,24,40,0.06);
+    -shadow-2: rgba(16,24,40,0.10);
+    -ring:     rgba(37,99,235,0.28);
+}
+
+/* --------- Typography / layout helpers --------- */
+.title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-padding: 2 0 6 0;
+}
+
+.hint, .message {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 13px;
+}
+
+/* Optional wrapper */
+.page-root { -fx-padding: 20; }
+
+/* Card container used on forms */
+.card {
+    -fx-background-color: -surface;
+    -fx-background-radius: 16;
+    -fx-border-color: #e7eefc;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 22 24 22 24;
+    -fx-effect: dropshadow(gaussian, -shadow-1, 22, 0.18, 0, 6);
+}
+
+/* Dashboard tiles – visually stronger than page bg */
+.tile-pane .button {
+    -fx-background-color: #dbe8ff;
+    -fx-text-fill: #163a6b;
+    -fx-font-weight: 700;
+    -fx-background-radius: 14;
+    -fx-border-color: #bcd0ff;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 12 18 12 18;
+}
+.tile-pane .button:hover   { -fx-background-color: #c6dbff; }
+.tile-pane .button:pressed { -fx-background-color: #b6d0ff; }
+
+/* --------- Inputs (TextField / PasswordField / Combo / DatePicker / ChoiceBox) --------- */
+.text-field, .password-field, .combo-box-base, .date-picker, .choice-box {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-background-color: -surface;
+    -fx-border-color: #cbd7eb;
+    -fx-border-width: 1;
+    -fx-padding: 8 12 8 12;
+    -fx-text-fill: -color-text;
+}
+.text-field:focused, .password-field:focused,
+.combo-box-base:focused, .date-picker:focused, .choice-box:focused {
+    -fx-border-color: -primary;
+    -fx-effect: dropshadow(gaussian, -ring, 10, 0.4, 0, 0);
+}
+
+/* Fix transparent popup backgrounds + readable hovers */
+.combo-box-popup, .choice-box .context-menu, .context-menu {
+    -fx-background-color: -surface;
+    -fx-border-color: #cbd7eb;
+    -fx-border-width: 1;
+}
+.combo-box-popup .list-view, .menu-item, .list-cell {
+    -fx-background-color: -surface;
+    -fx-text-fill: -color-text;
+}
+.list-cell:filled:hover, .menu-item:focused, .menu-item:hover {
+    -fx-background-color: #eaf2ff;
+}
+.list-cell:filled:selected, .menu-item:focused > .label {
+    -fx-background-color: #dbe8ff;
+    -fx-text-fill: -color-text;
+}
+
+/* DatePicker popup */
+.date-picker .arrow-button { -fx-background-radius: 8; }
+.date-picker-popup > *     { -fx-background-color: -surface; }
+
+/* --------- Buttons: base + categories --------- */
+/* Base button — ensures non-classed login buttons look strong (blue) */
+.button {
+    -fx-background-radius: 12;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-padding: 8 16 8 16;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: linear-gradient(to bottom, -primary 0%, -primary-2 100%);
+}
+.button:hover   { -fx-background-color: linear-gradient(to bottom, #2b6af1 0%, #2558cf 100%); }
+.button:pressed { -fx-background-color: #1f4ec6; }
+
+/* Category buttons (override the base where used) */
+
+/* Primary (Book / Submit / Export) */
+.btn-primary {
+    -fx-background-color: linear-gradient(to bottom, -primary 0%, -primary-2 100%);
+    -fx-text-fill: #ffffff;
+}
+.btn-primary:hover   { -fx-background-color: linear-gradient(to bottom, #2b6af1 0%, #2558cf 100%); }
+.btn-primary:pressed { -fx-background-color: #1f4ec6; }
+
+/* Secondary / Back / neutral */
+.btn-secondary, .btn-back, .btn-chip {
+    -fx-background-color: linear-gradient(to bottom, -secondary 0%, -secondary-2 100%);
+    -fx-text-fill: #ffffff;
+}
+.btn-secondary:hover, .btn-back:hover, .btn-chip:hover   { -fx-background-color: #56647a; }
+.btn-secondary:pressed, .btn-back:pressed, .btn-chip:pressed { -fx-background-color: #4b586e; }
+
+/* Accent / Approve / Positive */
+.btn-accent {
+    -fx-background-color: linear-gradient(to bottom, -accent 0%, -accent-2 100%);
+    -fx-text-fill: #ffffff;
+}
+.btn-accent:hover   { -fx-background-color: #249846; }
+.btn-accent:pressed { -fx-background-color: #1f7c39; }
+
+/* Danger / Logout / Destructive */
+.btn-danger, .btn-logout {
+    -fx-background-color: linear-gradient(to bottom, -danger 0%, -danger-2 100%);
+    -fx-text-fill: #ffffff;
+}
+.btn-danger:hover, .btn-logout:hover   { -fx-background-color: #c62828; }
+.btn-danger:pressed, .btn-logout:pressed { -fx-background-color: #aa1e1e; }
+
+/* Link-style (for subtle in-page actions) */
+.btn-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -primary;
+    -fx-underline: true;
+}
+.btn-link:hover { -fx-text-fill: -primary-2; }
+
+/* Buttons inside toolbars */
+.hbox > .button { -fx-spacing: 8; }
+
+/* --------- Alerts / Dialogs (polish) --------- */
+.dialog-pane    { -fx-background-color: -surface; }
+.dialog-pane:header .header-panel { -fx-background-color: -surface-2; }
+.dialog-pane .button { -fx-background-radius: 10; }
+
+/* --------- Scrollbars (subtle) --------- */
+.scroll-bar:vertical, .scroll-bar:horizontal { -fx-background-color: transparent; }
+.scroll-bar .thumb { -fx-background-color: #cbd7eb; -fx-background-radius: 6; }
+.scroll-bar .thumb:hover { -fx-background-color: #b6c6df; }

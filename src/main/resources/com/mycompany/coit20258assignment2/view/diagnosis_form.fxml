@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mycompany.coit20258assignment2.DiagnosisFormController"
+      spacing="16">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button text="← Back" onAction="#onBack"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Logout" onAction="#onLogout"/>
+    </HBox>
+
+    <Label text="Record Diagnosis" style="-fx-font-size:22; -fx-font-weight:bold;"/>
+
+    <GridPane hgap="10" vgap="10" maxWidth="700">
+        <columnConstraints>
+            <ColumnConstraints minWidth="160" halignment="RIGHT"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Patient:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <ChoiceBox fx:id="patientChoice" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Clinical Notes:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextArea fx:id="notesArea" prefRowCount="5" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Treatment Plan:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextArea fx:id="planArea" prefRowCount="4" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Save" onAction="#onSave"/>
+    </HBox>
+
+    <Label fx:id="message"/>
+</VBox>
