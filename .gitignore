@@ -1,0 +1,253 @@
+# ==========================================
+# THS-Enhanced System .gitignore
+# Project: COIT20258 Assignment 3 - Group 6
+# ==========================================
+
+# ====================
+# Java Compiled Files
+# ====================
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ====================
+# Maven
+# ====================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ====================
+# NetBeans
+# ====================
+**/nbproject/private/
+**/nbproject/Makefile-*.mk
+**/nbproject/Package-*.bash
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+nb-configuration.xml
+nbactions.xml
+nb-configuration.xml.bak
+
+# ====================
+# IntelliJ IDEA
+# ====================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# ====================
+# Eclipse
+# ====================
+.classpath
+.project
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+# ====================
+# VS Code
+# ====================
+.vscode/
+*.code-workspace
+.history/
+
+# ====================
+# Operating System Files
+# ====================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ====================
+# Logs and Databases
+# ====================
+*.log
+*.sql
+*.sqlite
+*.db
+logs/
+log/
+
+# ====================
+# Sensitive Data Files
+# ====================
+# Data files (keep structure but not actual data)
+data/*.dat
+data/*.ser
+!data/.gitkeep
+
+# Database credentials
+database.properties
+db.properties
+config.properties
+*.env
+
+# ====================
+# Backup Files
+# ====================
+*.bak
+*.backup
+*~
+*.orig
+*.rej
+
+# ====================
+# Package Files
+# ====================
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# ====================
+# JavaFX and FXML
+# ====================
+# Keep FXML files but ignore compiled resources
+# target/classes/ already ignored above
+
+# ====================
+# Test Results
+# ====================
+TEST-*.xml
+*.tap
+*.log
+
+# ====================
+# Documentation
+# ====================
+# Keep markdown files but ignore generated docs
+javadoc/
+doc/api/
+
+# ====================
+# Security
+# ====================
+*.key
+*.pem
+*.p12
+*.jks
+secrets.txt
+credentials.txt
+
+# ====================
+# Temporary Files
+# ====================
+*.tmp
+*.temp
+~$*
+*.autosave
+
+# ====================
+# Server/Runtime Files
+# ====================
+*.pid
+server.log
+error.log
+access.log
+
+# ====================
+# Keep Important Files
+# ====================
+# Force include certain files even if ignored by patterns above
+!.gitignore
+!README.md
+!pom.xml
+
+# ====================
+# Assignment Specific
+# ====================
+# Keep documentation files
+!*.md
+!COIT20258-Assignment3-Specification.pdf
+
+# Keep source code structure
+!src/**/*.java
+!src/**/*.fxml
+!src/**/*.css
+
+# Keep data directory structure but not actual data
+!data/
+data/*
+!data/.gitkeep
+
+# ====================
+# Node modules (if any frontend)
+# ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ====================
+# Miscellaneous
+# ====================
+*.cache
+*.diff
+*.err
+*.orig
+*.rej
+*.swo
+*.swp
+*.vi
+*~
+*.sass-cache
+.idea/workspace.xml
+.idea/tasks.xml
