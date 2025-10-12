@@ -78,9 +78,13 @@ public class SceneNavigator {
     public void goToReferralForm()         { go("referral_form.fxml"); }
     public void goToDiagnosisForm()        { go("diagnosis_form.fxml"); }
     public void goToMyDataView()           { go("my_data_view.fxml"); }
+    public void goToDoctorUnavailability() { go("doctor_unavailability.fxml"); }
 
-    // NEW: Doctor-specific My Data page
+
     public void goToDoctorDataView()       { go("doctor_data_view.fxml"); }
+
+
+    public void goToAdminAppointments()    { go("admin_appointments.fxml"); }
 
     public void goToHealthTips()           { go("health_tips.fxml"); }
     public void goToSignup()               { go("signup.fxml"); }

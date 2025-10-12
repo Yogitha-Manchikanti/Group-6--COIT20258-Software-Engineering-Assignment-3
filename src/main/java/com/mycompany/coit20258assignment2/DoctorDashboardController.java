@@ -20,6 +20,7 @@ public class DoctorDashboardController {
     @FXML public void openReferralForm()       { SceneNavigator.getInstance().goToReferralForm(); }
     @FXML public void openPrescriptionReview() { SceneNavigator.getInstance().goToPrescriptionReview(); }
     @FXML public void openMyData()             { SceneNavigator.getInstance().goToMyDataView(); }
+    @FXML public void openUnavailability()     { SceneNavigator.getInstance().goToDoctorUnavailability(); }
 
     @FXML
     public void onLogout() {

@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Client Lead (Member 2) - Client Service Layer
- * Provides high-level API for UI controllers to interact with server
- */
+
 public class ClientService {
     private static ClientService instance;
     private ServerConnection connection;

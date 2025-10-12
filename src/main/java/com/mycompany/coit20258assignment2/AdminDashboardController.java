@@ -14,7 +14,14 @@ public class AdminDashboardController {
         }
     }
 
-    @FXML public void onLogout() {
+
+    @FXML 
+    public void onViewAppointments() {
+        SceneNavigator.getInstance().goToAdminAppointments();
+    }
+
+    @FXML 
+    public void onLogout() {
         Session.logout();
         SceneNavigator.getInstance().goToLogin();
     }

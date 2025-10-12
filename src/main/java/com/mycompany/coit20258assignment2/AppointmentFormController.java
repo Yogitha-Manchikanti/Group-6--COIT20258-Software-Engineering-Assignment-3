@@ -43,12 +43,44 @@ public class AppointmentFormController {
             times.add(String.format("%02d:30", h));
         });
         timeBox.setItems(times);
+        
+        // Add listeners to check availability when doctor or date changes
+        doctorBox.setOnAction(e -> checkAvailability());
+        datePicker.setOnAction(e -> checkAvailability());
+        timeBox.setOnAction(e -> checkAvailability());
+    }
+    
+    /**
+     * Check if selected doctor is available at selected date/time
+     */
+    private void checkAvailability() {
+        String doctorSel = doctorBox.getValue();
+        LocalDate date = datePicker.getValue();
+        String timeSel = timeBox.getValue();
+        
+        if (doctorSel == null || date == null || timeSel == null) {
+            message.setText("");
+            return;
+        }
+        
+        String doctorId = doctorSel.split(" - ")[0];
+        LocalTime time = LocalTime.parse(timeSel);
+        
+        if (!DoctorUnavailabilityService.isDoctorAvailable(doctorId, date, time)) {
+            String reason = DoctorUnavailabilityService.getUnavailabilityReason(doctorId, date, time);
+            message.setText("⚠️ Doctor unavailable: " + reason);
+            message.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
+        } else {
+            message.setText("✅ Doctor is available at this time");
+            message.setStyle("-fx-text-fill: green;");
+        }
     }
 
     @FXML
     public void onBook() {
         if (!Session.isPatient()) {
             message.setText("Please login as a patient to book appointments.");
+            message.setStyle("-fx-text-fill: red;");
             return;
         }
         String doctorSel = doctorBox.getValue();
@@ -57,6 +89,7 @@ public class AppointmentFormController {
 
         if (doctorSel == null || date == null || timeSel == null) {
             message.setText("Choose doctor, date, and time.");
+            message.setStyle("-fx-text-fill: red;");
             return;
         }
 
@@ -71,13 +104,20 @@ public class AppointmentFormController {
             if (appt.getStatus() == AppointmentStatus.BOOKED) {
                 String doctorName = store.findDoctorName(doctorId);
                 message.setText(
-                        "Booked with " + doctorName + " on " + date + " at " + time + " (ID: " + appt.getId() + ")"
+                        "✅ Booked with " + doctorName + " on " + date + " at " + time + " (ID: " + appt.getId() + ")"
                 );
+                message.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
             } else {
                 message.setText("Appointment created (status: " + appt.getStatus() + ", ID: " + appt.getId() + ")");
+                message.setStyle("-fx-text-fill: blue;");
             }
+        } catch (IllegalStateException e) {
+            // Doctor unavailability error
+            message.setText("❌ " + e.getMessage());
+            message.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
         } catch (Exception e) {
-            message.setText("Error: " + e.getMessage());
+            message.setText("❌ Error: " + e.getMessage());
+            message.setStyle("-fx-text-fill: red;");
         }
     }
 
