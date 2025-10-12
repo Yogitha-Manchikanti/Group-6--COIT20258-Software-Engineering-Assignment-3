@@ -128,6 +128,35 @@ public class AuthDAO {
     }
     
     /**
+     * Reset password by username or email
+     */
+    public boolean resetPassword(String identifier, String newPassword) {
+        String sql = "UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE username = ? OR email = ?";
+        
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, newPassword);
+            stmt.setString(2, identifier);
+            stmt.setString(3, identifier);
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("✅ Password reset successful for: " + identifier);
+                return true;
+            } else {
+                System.out.println("❌ User not found: " + identifier);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Database error resetting password: " + e.getMessage());
+        }
+        
+        return false;
+    }
+    
+    /**
      * Check if username or email already exists
      */
     public boolean userExists(String username, String email) {
@@ -210,5 +239,42 @@ public class AuthDAO {
         }
         
         return Optional.empty();
+    }
+
+    /**
+     * Get all users from database (for admin purposes)
+     */
+    public java.util.List<java.util.Map<String, Object>> getAllUsers() {
+        String sql = """
+            SELECT id, name, email, username, user_type, specialization 
+            FROM users 
+            ORDER BY user_type, name
+            """;
+        
+        java.util.List<java.util.Map<String, Object>> users = new java.util.ArrayList<>();
+        
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                java.util.Map<String, Object> user = new java.util.HashMap<>();
+                user.put("id", rs.getString("id"));
+                user.put("name", rs.getString("name"));
+                user.put("email", rs.getString("email"));
+                user.put("username", rs.getString("username"));
+                user.put("user_type", rs.getString("user_type"));
+                user.put("specialization", rs.getString("specialization"));
+                users.add(user);
+            }
+            
+            System.out.println(" Retrieved " + users.size() + " users from database");
+            
+        } catch (SQLException e) {
+            System.err.println("Database error getting all users: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return users;
     }
 }

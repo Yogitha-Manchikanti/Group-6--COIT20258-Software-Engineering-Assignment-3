@@ -5,10 +5,12 @@ public class Administrator extends User {
 
     public Administrator(String id, String name, String email, String username, String password) {
         super(id, name, email, username, password);
+        setUserType(UserType.ADMINISTRATOR);
     }
 
     // legacy
     public Administrator(String id, String name, String username, String password) {
         super(id, name, username, password);
+        setUserType(UserType.ADMINISTRATOR);
     }
 }

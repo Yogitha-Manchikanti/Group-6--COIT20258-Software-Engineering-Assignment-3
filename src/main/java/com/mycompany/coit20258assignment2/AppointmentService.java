@@ -56,7 +56,7 @@ public class AppointmentService {
         var list = store.getAppointments();
         var appt = list.stream().filter(a -> a.getId().equals(appointmentId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
-        appt.setStatus(AppointmentStatus.CANCELED);
+        appt.setStatus(AppointmentStatus.CANCELLED);
         store.saveAppointments(list);
     }
 

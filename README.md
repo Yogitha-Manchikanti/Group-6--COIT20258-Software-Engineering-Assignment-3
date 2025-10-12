@@ -47,11 +47,13 @@
 ### Core Features (Assignment 2 Enhanced)
 
 #### 1. **User Management**
-- 🔐 Secure login/logout
+- 🔐 Secure login/logout (server-based authentication)
 - 👤 Multiple user roles: Patient, Doctor, Administrator
 - 📧 Email-based authentication
-- 🆕 User signup
-- 🔑 Password reset functionality
+- 🆕 **New User Signup** (patients can self-register)
+- 🔑 **Password Reset** (temporary password reset via username/email)
+- 💾 Database-backed user storage
+- 🔒 Session management
 
 #### 2. **Appointment Management**
 - 📅 Book appointments with doctors
@@ -102,9 +104,16 @@
 #### 8. **TCP Client-Server Architecture**
 - 🌐 Multi-threaded TCP server (Port 8080)
 - 🔌 Socket-based communication
-- 🔄 13 request types supported
-- 🔐 Server-side authentication
+- 🔄 **15 request types supported:**
+  - LOGIN, SIGNUP, RESET_PASSWORD
+  - GET_APPOINTMENTS, CREATE_APPOINTMENT, UPDATE_APPOINTMENT, DELETE_APPOINTMENT
+  - GET_PRESCRIPTIONS, CREATE_PRESCRIPTION, UPDATE_PRESCRIPTION, REQUEST_REFILL
+  - RECORD_VITAL_SIGNS, GET_VITAL_SIGNS
+  - GET_UNAVAILABILITIES, CREATE_UNAVAILABILITY, DELETE_UNAVAILABILITY
+  - GET_REFERRALS, GET_USERS, PING
+- 🔐 Server-side authentication & validation
 - 🔀 Dual-mode operation (Local + Server)
+- ⚡ Auto-connect on first request
 
 #### 9. **Database Management**
 - 🗄️ MySQL integration (ths_enhanced)
@@ -351,11 +360,28 @@ When login successful, you'll see server logs:
 ### First-Time Setup
 
 1. **Launch the application**
-2. **Option 1:** Login with existing credentials
-3. **Option 2:** Click **"Sign Up"** to create new patient account
-   - Fill in all required fields
-   - Email and username must be unique
-   - Password requires confirmation
+2. **Option 1:** Login with existing credentials (see table below)
+3. **Option 2:** Create new patient account
+   - Click **"Sign Up"** button on login page
+   - Fill in required fields:
+     - Full Name
+     - Email (must be unique)
+     - Username (must be unique)
+     - Password
+     - Confirm Password
+   - Click **"Sign Up"**
+   - On success: Account created in database with auto-generated patient ID (pat###)
+   - Return to login and use your new credentials
+
+### Password Reset
+
+If you forget your password:
+1. Click **"Forgot Password?"** on login page
+2. Enter your **username** or **email**
+3. Click **"Reset Password"**
+4. Your password will be reset to: **reset123**
+5. Return to login and use: **username + reset123**
+6. (Recommended: Change password after logging in)
 
 ### Patient Workflow
 
@@ -497,6 +523,40 @@ mvn test -Dtest=ClientTest
 3. Doctor approves
 4. Patient sees updated prescription status
 
+#### Scenario 4: User Signup & Password Reset
+
+**Part A: New User Registration**
+1. Start TCP server
+2. Launch client application
+3. Click **"Sign Up"**
+4. Fill form:
+   - Name: Test Patient
+   - Email: testpatient@email.com
+   - Username: testuser
+   - Password: test123
+   - Confirm: test123
+5. Click **"Sign Up"**
+6. **Expected:** ✅ "Account created successfully. Please login with your credentials."
+7. Check database: `SELECT * FROM users WHERE username = 'testuser';`
+8. **Expected:** New record with auto-generated patient ID (pat###)
+
+**Part B: Password Reset**
+1. On login page, click **"Forgot Password?"**
+2. Enter username: `testuser` (or email: testpatient@email.com)
+3. Click **"Reset Password"**
+4. **Expected:** ✅ "Password reset successfully. Temporary password: reset123"
+5. Return to login
+6. Login with: `testuser` / `reset123`
+7. **Expected:** Login successful
+8. Check database: `SELECT password FROM users WHERE username = 'testuser';`
+9. **Expected:** Password is now `reset123`
+
+**Part C: Duplicate Prevention**
+1. Try to signup with same username
+2. **Expected:** ❌ "Username already exists"
+3. Try to signup with same email
+4. **Expected:** ❌ "Email already registered"
+
 ---
 
 ## 📁 Project Structure
@@ -524,8 +584,8 @@ THS-Enhanced/
 │   │   │   │
 │   │   │   ├── # Controllers (GUI)
 │   │   │   ├── LoginController.java
-│   │   │   ├── SignupController.java
-│   │   │   ├── ForgotPasswordController.java
+│   │   │   ├── SignupController.java              # Server-based signup
+│   │   │   ├── ForgotPasswordController.java      # Server-based password reset
 │   │   │   ├── PatientDashboardController.java
 │   │   │   ├── DoctorDashboardController.java
 │   │   │   ├── AdminDashboardController.java
@@ -545,18 +605,26 @@ THS-Enhanced/
 │   │   │   ├── DataStore.java                    # Local storage
 │   │   │   │
 │   │   │   ├── # Server (Assignment 3)
-│   │   │   ├── THSServer.java                    # TCP Server
-│   │   │   ├── ClientHandler.java                # Request handler
-│   │   │   ├── DatabaseManager.java              # Connection pool
-│   │   │   ├── AuthDAO.java                      # Authentication
-│   │   │   ├── AppointmentDAO.java               # Appointments
-│   │   │   ├── PrescriptionDAO.java              # Prescriptions
-│   │   │   └── VitalSignsDAO.java                # Vital signs
+│   │   │   ├── server/
+│   │   │   │   ├── THSServer.java                 # TCP Server
+│   │   │   │   ├── ClientHandler.java             # 15+ request handlers
+│   │   │   │   ├── DatabaseManager.java           # Connection pool
+│   │   │   │   └── dao/
+│   │   │   │       ├── AuthDAO.java               # Authentication + signup + reset
+│   │   │   │       ├── AppointmentDAO.java        # Appointments
+│   │   │   │       ├── PrescriptionDAO.java       # Prescriptions
+│   │   │   │       ├── VitalSignsDAO.java         # Vital signs
+│   │   │   │       ├── ReferralDAO.java           # Referrals
+│   │   │   │       └── DoctorUnavailabilityDAO.java # Unavailability
 │   │   │   │
 │   │   │   └── # Client (Assignment 3)
-│   │   │       ├── ServerConnection.java         # Socket manager
-│   │   │       ├── ClientService.java            # API methods
-│   │   │       └── GenericRequest.java           # Request wrapper
+│   │   │       ├── client/
+│   │   │       │   ├── ServerConnection.java      # Socket manager + auto-connect
+│   │   │       │   └── ClientService.java         # API methods (login, signup, reset, etc.)
+│   │   │       └── common/
+│   │   │           ├── GenericRequest.java        # Request wrapper
+│   │   │           ├── GenericResponse.java       # Response wrapper
+│   │   │           └── BaseRequest.java, BaseResponse.java
 │   │   │
 │   │   └── resources/com/mycompany/coit20258assignment2/
 │   │       └── view/

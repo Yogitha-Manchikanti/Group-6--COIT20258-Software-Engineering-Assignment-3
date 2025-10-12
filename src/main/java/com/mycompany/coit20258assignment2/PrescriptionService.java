@@ -19,7 +19,7 @@ public class PrescriptionService {
     public Prescription request(String patientId, String doctorId, String medication, String dosage) {
         String id = "RX" + UUID.randomUUID().toString().substring(0, 8);
         Prescription p = new Prescription(id, patientId, doctorId, medication, dosage,
-                LocalDate.now(), PrescriptionStatus.NEW);
+                LocalDate.now(), PrescriptionStatus.ACTIVE);
         var list = store.getPrescriptions();
         list.add(p);
         store.savePrescriptions(list);
@@ -31,7 +31,7 @@ public class PrescriptionService {
         var list = store.getPrescriptions();
         var rx = list.stream().filter(r -> r.getId().equals(prescriptionId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found: " + prescriptionId));
-        rx.setStatus(PrescriptionStatus.APPROVED);
+        rx.setStatus(PrescriptionStatus.ACTIVE);
         store.savePrescriptions(list);
     }
 
@@ -40,7 +40,7 @@ public class PrescriptionService {
         var list = store.getPrescriptions();
         var rx = list.stream().filter(r -> r.getId().equals(prescriptionId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found: " + prescriptionId));
-        rx.setStatus(PrescriptionStatus.REFILLED);
+        rx.setStatus(PrescriptionStatus.COMPLETED);
         store.savePrescriptions(list);
     }
 

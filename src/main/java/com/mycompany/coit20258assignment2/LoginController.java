@@ -38,34 +38,19 @@ public class LoginController {
                 return; 
             }
 
-            // CLIENT LEAD ENHANCEMENT: Try server authentication first
-            boolean useServer = (useServerCheckbox != null && useServerCheckbox.isSelected());
+            // ASSIGNMENT 3: Always use server authentication
+            setMsg("Connecting to server...", false);
+            ClientService.LoginResult result = clientService.login(id, pw);
             
-            if (useServer) {
-                setMsg("Connecting to server...", false);
-                ClientService.LoginResult result = clientService.login(id, pw);
-                
-                if (result.isSuccess()) {
-                    Session.set(result.getUser());
-                    setMsg("Login successful!", false);
-                    navigateToDashboard();
-                    return;
-                } else {
-                    setMsg("Server: " + result.getMessage(), true);
-                    // Fall back to local authentication
-                    System.out.println("Falling back to local authentication...");
-                }
+            if (result.isSuccess()) {
+                Session.set(result.getUser());
+                setMsg("Login successful!", false);
+                navigateToDashboard();
+                return;
+            } else {
+                setMsg("Server: " + result.getMessage() + "\n\nMake sure THSServer is running!", true);
+                return;
             }
-            
-            // Fallback to local authentication (Assignment 2 method)
-            Optional<User> user = auth.login(id, pw);
-            if (user.isEmpty()) { 
-                setMsg("Invalid credentials.", true); 
-                return; 
-            }
-
-            Session.set(user.get());
-            navigateToDashboard();
             
         } catch (Exception e) { 
             e.printStackTrace(); 

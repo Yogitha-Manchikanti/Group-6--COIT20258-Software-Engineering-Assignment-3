@@ -1,6 +1,29 @@
 -- THS-Enhanced Database Schema
 -- COIT20258 Assignment 3
 -- MySQL Database Setup
+-- Last Updated: October 13, 2025
+--
+-- Features Implemented:
+-- 1. User Management (signup, password reset)
+-- 2. Appointment Management (with doctor unavailability checking)
+-- 3. Prescription Management (with refill requests)
+-- 4. Vital Signs Monitoring (remote data submission)
+-- 5. Diagnoses & Referrals
+-- 6. Doctor Unavailability Management
+-- 7. Session Logging & Audit Trail
+--
+-- New in Latest Update:
+-- - Server-based user signup (auto-generates patient IDs: pat###)
+-- - Password reset functionality (resets to temporary password: reset123)
+-- - All authentication now handled by AuthDAO with database storage
+-- - Removed dependency on DataStore (.dat files)
+--
+-- Test Accounts:
+-- Admin: admin / admin123
+-- Doctor: drjohnson / doctor123
+-- Patient: jsmith / patient123
+-- 
+-- To create new accounts: Use the signup feature on client application
 
 CREATE DATABASE IF NOT EXISTS ths_enhanced;
 USE ths_enhanced;
@@ -25,7 +48,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     doctor_id VARCHAR(50) NOT NULL,
     appointment_date DATE NOT NULL,
     appointment_time TIME NOT NULL,
-    status ENUM('SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'SCHEDULED',
+    status ENUM('SCHEDULED', 'BOOKED', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED') DEFAULT 'SCHEDULED',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,

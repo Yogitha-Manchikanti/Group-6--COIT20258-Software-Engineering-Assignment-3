@@ -37,10 +37,15 @@
             <TextField fx:id="destinationField" promptText="e.g., City Hospital"
                        GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
+            <!-- Specialty -->
+            <Label text="Specialty:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="specialtyField" promptText="e.g., Cardiology, Neurology"
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
             <!-- Reason -->
-            <Label text="Reason:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <Label text="Reason:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
             <TextArea fx:id="reasonArea" prefRowCount="4" promptText="Brief reason"
-                      GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                      GridPane.rowIndex="3" GridPane.columnIndex="1"/>
         </GridPane>
 
         <HBox spacing="10" alignment="CENTER_RIGHT">

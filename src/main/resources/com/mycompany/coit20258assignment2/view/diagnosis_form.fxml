@@ -26,11 +26,17 @@
         <Label text="Patient:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
         <ChoiceBox fx:id="patientChoice" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-        <Label text="Clinical Notes:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextArea fx:id="notesArea" prefRowCount="5" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Diagnosis Code:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="diagnosisCodeField" promptText="e.g., ICD-10 code" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <Label text="Treatment Plan:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <TextArea fx:id="planArea" prefRowCount="4" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Severity:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <ChoiceBox fx:id="severityChoice" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Diagnosis Description:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextArea fx:id="descriptionArea" prefRowCount="4" promptText="Primary diagnosis description" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Clinical Notes:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextArea fx:id="notesArea" prefRowCount="4" promptText="Additional clinical observations" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
     </GridPane>
 
     <HBox alignment="CENTER_RIGHT">

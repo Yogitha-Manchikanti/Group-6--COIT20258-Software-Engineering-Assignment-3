@@ -5,9 +5,11 @@ public class Patient extends User {
 
     public Patient(String id, String name, String email, String username, String password) {
         super(id, name, email, username, password);
+        setUserType(UserType.PATIENT);
     }
 
     public Patient(String id, String name, String username, String password) {
         super(id, name, username, password);
+        setUserType(UserType.PATIENT);
     }
 }
