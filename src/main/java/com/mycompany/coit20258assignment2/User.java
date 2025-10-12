@@ -11,6 +11,7 @@ public class User implements Serializable {
     private String email;     // NEW
     private String username;  // kept for backward compat
     private String password;
+    private UserType userType = UserType.PATIENT; // Default type
 
     public User(String id, String name, String email, String username, String password) {
         this.id = id; this.name = name; this.email = email;
@@ -27,11 +28,14 @@ public class User implements Serializable {
     public String getEmail() { return email; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
+    public UserType getUserType() { return userType; }
+    public String getFullName() { return name; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }
+    public void setUserType(UserType userType) { this.userType = userType; }
 
     @Override public String toString() { return name; }
 }
