@@ -4,10 +4,7 @@ import com.mycompany.coit20258assignment2.*;
 import com.mycompany.coit20258assignment2.client.ClientService.LoginResult;
 import java.util.List;
 
-/**
- * Client Lead (Member 2) - Client Testing Utility
- * Tests all client-server communication
- */
+
 public class ClientTest {
     
     public static void main(String[] args) {

@@ -5,10 +5,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.ConnectException;
 
-/**
- * Client Lead (Member 2) - Socket Client Manager
- * Handles all communication with the TCP server
- */
+
 public class ServerConnection {
     private static ServerConnection instance;
     private Socket socket;

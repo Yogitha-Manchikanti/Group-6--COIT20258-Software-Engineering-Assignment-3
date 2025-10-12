@@ -9,10 +9,7 @@ import javafx.scene.control.CheckBox;
 
 import java.util.Optional;
 
-/**
- * Client Lead (Member 2) - Enhanced Login Controller
- * Now supports both server-based and local authentication
- */
+
 public class LoginController {
 
     @FXML private TextField usernameField; // used for email OR username

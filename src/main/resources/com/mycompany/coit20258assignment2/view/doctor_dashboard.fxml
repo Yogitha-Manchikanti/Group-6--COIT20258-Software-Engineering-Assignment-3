@@ -33,6 +33,7 @@
             <Button text="Record Diagnosis"     onAction="#openDiagnosisForm"      prefWidth="240" prefHeight="60"/>
             <Button text="Create Referral"      onAction="#openReferralForm"       prefWidth="240" prefHeight="60"/>
             <Button text="Review Prescriptions" onAction="#openPrescriptionReview" prefWidth="240" prefHeight="60"/>
+            <Button text="Manage Unavailability" onAction="#openUnavailability"    prefWidth="240" prefHeight="60" style="-fx-background-color: #e67e22; -fx-text-fill: white;"/>
             <Button text="My Data"              onAction="#openMyData"             prefWidth="240" prefHeight="60"/>
         </children>
     </TilePane>

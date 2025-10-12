@@ -15,6 +15,14 @@ public class AppointmentService {
     }
 
     public Appointment book(String patientId, String doctorId, LocalDate date, LocalTime time) {
+        // Check if doctor is available
+        if (!DoctorUnavailabilityService.isDoctorAvailable(doctorId, date, time)) {
+            String reason = DoctorUnavailabilityService.getUnavailabilityReason(doctorId, date, time);
+            throw new IllegalStateException(
+                "Doctor is unavailable at this time. Reason: " + reason
+            );
+        }
+        
         String id = "AP" + UUID.randomUUID().toString().substring(0, 8);
         Appointment a = new Appointment(id, patientId, doctorId, date, time, AppointmentStatus.BOOKED);
         var list = store.getAppointments();
@@ -28,6 +36,15 @@ public class AppointmentService {
         var list = store.getAppointments();
         var appt = list.stream().filter(a -> a.getId().equals(appointmentId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+        
+        // Check if doctor is available at new date/time
+        if (!DoctorUnavailabilityService.isDoctorAvailable(appt.getDoctorId(), newDate, newTime)) {
+            String reason = DoctorUnavailabilityService.getUnavailabilityReason(appt.getDoctorId(), newDate, newTime);
+            throw new IllegalStateException(
+                "Doctor is unavailable at this time. Reason: " + reason
+            );
+        }
+        
         appt.setDate(newDate);
         appt.setTime(newTime);
         appt.setStatus(AppointmentStatus.RESCHEDULED);
