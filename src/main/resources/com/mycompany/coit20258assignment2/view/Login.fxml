@@ -23,6 +23,11 @@
             <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <PasswordField fx:id="passwordField" promptText="pass"
                            GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            
+            <Label text="" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <CheckBox fx:id="useServerCheckbox" text="Use Server Authentication (Port 8080)" 
+                      GridPane.rowIndex="2" GridPane.columnIndex="1"
+                      style="-fx-font-size: 12px; -fx-text-fill: #0066cc;"/>
         </GridPane>
 
         <HBox spacing="10" alignment="CENTER_RIGHT">

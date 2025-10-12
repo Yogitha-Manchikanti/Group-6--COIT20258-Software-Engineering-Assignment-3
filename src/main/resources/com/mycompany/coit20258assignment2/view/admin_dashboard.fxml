@@ -6,7 +6,8 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.mycompany.coit20258assignment2.AdminDashboardController"
-      spacing="16" padding="20">
+      spacing="16">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
 
     <HBox spacing="12" alignment="CENTER_LEFT">
         <Label fx:id="welcome" style="-fx-font-size:20; -fx-font-weight:bold;"/>
