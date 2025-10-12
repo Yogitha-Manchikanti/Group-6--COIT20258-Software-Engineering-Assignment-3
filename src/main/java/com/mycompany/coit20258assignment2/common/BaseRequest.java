@@ -1,6 +1,8 @@
 package com.mycompany.coit20258assignment2.common;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for all client-server communication requests
@@ -13,6 +15,7 @@ public abstract class BaseRequest implements Serializable {
     private String requestType;
     private String userId;
     private long timestamp;
+    protected Map<String, Object> data = new HashMap<>();
     
     public BaseRequest(String requestType, String userId) {
         this.requestType = requestType;
@@ -30,7 +33,12 @@ public abstract class BaseRequest implements Serializable {
     public String getRequestType() { return requestType; }
     public String getUserId() { return userId; }
     public long getTimestamp() { return timestamp; }
+    public Map<String, Object> getData() { return data; }
     
     public void setRequestId(String requestId) { this.requestId = requestId; }
     public void setUserId(String userId) { this.userId = userId; }
+    
+    public void addData(String key, Object value) {
+        data.put(key, value);
+    }
 }
