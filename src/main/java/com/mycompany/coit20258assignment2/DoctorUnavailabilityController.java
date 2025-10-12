@@ -1,22 +1,22 @@
 package com.mycompany.coit20258assignment2;
 
+import com.mycompany.coit20258assignment2.client.ClientService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Controller for managing doctor unavailability periods
+ * ASSIGNMENT 3: Server-only mode - all data saved to database via TCP server
  */
 public class DoctorUnavailabilityController {
     
@@ -42,8 +42,16 @@ public class DoctorUnavailabilityController {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     
+    private final ClientService clientService = ClientService.getInstance();
+    
     @FXML
     public void initialize() {
+        // Check server connection
+        if (!clientService.isConnected()) {
+            showError("Server not available. Please ensure THSServer is running.");
+            return;
+        }
+        
         // Setup reason dropdown
         reasonComboBox.setItems(FXCollections.observableArrayList(
             "Vacation",
@@ -87,14 +95,14 @@ public class DoctorUnavailabilityController {
         endDatePicker.setValue(LocalDate.now());
         
         // Setup table
-        colStartDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
-        colEndDate.setCellValueFactory(new PropertyValueFactory<>("endDate"));
-        colTime.setCellValueFactory(new PropertyValueFactory<>("timeRange"));
-        colReason.setCellValueFactory(new PropertyValueFactory<>("reason"));
+        colStartDate.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
+        colEndDate.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
+        colTime.setCellValueFactory(cellData -> cellData.getValue().timeRangeProperty());
+        colReason.setCellValueFactory(cellData -> cellData.getValue().reasonProperty());
         
         unavailabilityTable.setItems(unavailabilityData);
         
-        // Load existing unavailabilities
+        // Load existing unavailabilities from server
         loadUnavailabilities();
         
         // Update total count
@@ -103,6 +111,11 @@ public class DoctorUnavailabilityController {
     
     @FXML
     public void onAdd() {
+        if (!clientService.isConnected()) {
+            showError("Server not available");
+            return;
+        }
+        
         try {
             // Validate inputs
             LocalDate startDate = startDatePicker.getValue();
@@ -130,14 +143,15 @@ public class DoctorUnavailabilityController {
                 reason = reasonComboBox.getValue();
             }
             
-            // Create unavailability
-            DoctorUnavailability unavailability;
-            String id = UUID.randomUUID().toString().substring(0, 8);
+            // Generate ID
+            String id = "una" + UUID.randomUUID().toString().substring(0, 8);
             String doctorId = Session.get().getId();
+            boolean isAllDay = allDayCheckbox.isSelected();
             
-            if (allDayCheckbox.isSelected()) {
-                unavailability = new DoctorUnavailability(id, doctorId, startDate, endDate, reason);
-            } else {
+            String startTime = null;
+            String endTime = null;
+            
+            if (!isAllDay) {
                 // Parse times
                 String startTimeStr = startTimeField.getText().trim();
                 String endTimeStr = endTimeField.getText().trim();
@@ -147,51 +161,70 @@ public class DoctorUnavailabilityController {
                     return;
                 }
                 
-                LocalTime startTime = LocalTime.parse(startTimeStr, TIME_FORMATTER);
-                LocalTime endTime = LocalTime.parse(endTimeStr, TIME_FORMATTER);
-                
-                if (endTime.isBefore(startTime)) {
-                    showError("End time cannot be before start time");
+                try {
+                    LocalTime st = LocalTime.parse(startTimeStr, TIME_FORMATTER);
+                    LocalTime et = LocalTime.parse(endTimeStr, TIME_FORMATTER);
+                    
+                    if (et.isBefore(st)) {
+                        showError("End time cannot be before start time");
+                        return;
+                    }
+                    
+                    startTime = st.toString();
+                    endTime = et.toString();
+                } catch (Exception e) {
+                    showError("Invalid time format. Use HH:mm (e.g., 09:00)");
                     return;
                 }
-                
-                unavailability = new DoctorUnavailability(id, doctorId, startDate, endDate, 
-                                                         startTime, endTime, reason);
             }
             
-            // Add to list
-            DoctorUnavailabilityService.addUnavailability(unavailability);
+            // Send to server
+            boolean success = clientService.createUnavailability(
+                id, doctorId, 
+                startDate.toString(), endDate.toString(),
+                startTime, endTime, isAllDay, reason
+            );
             
-            // Add to table
-            unavailabilityData.add(new UnavailabilityRow(unavailability));
-            
-            // Clear form
-            clearForm();
-            
-            showSuccess("Unavailability added successfully!");
-            updateTotalLabel();
+            if (success) {
+                // Reload data from server
+                loadUnavailabilities();
+                clearForm();
+                showSuccess("Unavailability added successfully!");
+                updateTotalLabel();
+            } else {
+                showError("Failed to add unavailability");
+            }
             
         } catch (Exception e) {
             showError("Error adding unavailability: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
     @FXML
     public void onDelete() {
+        if (!clientService.isConnected()) {
+            showError("Server not available");
+            return;
+        }
+        
         UnavailabilityRow selected = unavailabilityTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showError("Please select an unavailability period to delete");
             return;
         }
         
-        // Remove from service
-        DoctorUnavailabilityService.deleteUnavailability(selected.getId());
+        // Delete from server
+        boolean success = clientService.deleteUnavailability(selected.getId());
         
-        // Remove from table
-        unavailabilityData.remove(selected);
-        
-        showSuccess("Unavailability deleted successfully!");
-        updateTotalLabel();
+        if (success) {
+            // Reload data from server
+            loadUnavailabilities();
+            showSuccess("Unavailability deleted successfully!");
+            updateTotalLabel();
+        } else {
+            showError("Failed to delete unavailability");
+        }
     }
     
     @FXML
@@ -200,15 +233,19 @@ public class DoctorUnavailabilityController {
     }
     
     private void loadUnavailabilities() {
-        // Load from service
+        // Load from server
         unavailabilityData.clear();
         String doctorId = Session.get().getId();
         
-        List<UnavailabilityRow> rows = DoctorUnavailabilityService.getUnavailabilities(doctorId).stream()
-            .map(UnavailabilityRow::new)
-            .collect(Collectors.toList());
+        System.out.println("📅 Loading unavailabilities for doctor: " + doctorId);
         
-        unavailabilityData.addAll(rows);
+        List<Map<String, Object>> unavailabilities = clientService.getUnavailabilities(doctorId);
+        
+        for (Map<String, Object> data : unavailabilities) {
+            unavailabilityData.add(new UnavailabilityRow(data));
+        }
+        
+        System.out.println("✅ Loaded " + unavailabilityData.size() + " unavailability periods");
     }
     
     private void clearForm() {
@@ -243,6 +280,7 @@ public class DoctorUnavailabilityController {
     
     /**
      * Helper class for TableView display
+     * Now uses Map<String, Object> from server instead of DoctorUnavailability object
      */
     public static class UnavailabilityRow {
         private final String id;
@@ -251,21 +289,28 @@ public class DoctorUnavailabilityController {
         private final SimpleStringProperty timeRange;
         private final SimpleStringProperty reason;
         
-        public UnavailabilityRow(DoctorUnavailability unavailability) {
-            this.id = unavailability.getId();
-            this.startDate = new SimpleStringProperty(unavailability.getStartDate().format(DATE_FORMATTER));
-            this.endDate = new SimpleStringProperty(unavailability.getEndDate().format(DATE_FORMATTER));
+        public UnavailabilityRow(Map<String, Object> data) {
+            this.id = (String) data.get("id");
+            this.startDate = new SimpleStringProperty((String) data.get("startDate"));
+            this.endDate = new SimpleStringProperty((String) data.get("endDate"));
             
+            Boolean isAllDay = (Boolean) data.get("isAllDay");
             String time;
-            if (unavailability.isAllDay()) {
+            
+            if (isAllDay != null && isAllDay) {
                 time = "All Day";
             } else {
-                time = unavailability.getStartTime().format(TIME_FORMATTER) + 
-                       " - " + 
-                       unavailability.getEndTime().format(TIME_FORMATTER);
+                String startTime = (String) data.get("startTime");
+                String endTime = (String) data.get("endTime");
+                if (startTime != null && endTime != null) {
+                    time = startTime + " - " + endTime;
+                } else {
+                    time = "All Day";
+                }
             }
+            
             this.timeRange = new SimpleStringProperty(time);
-            this.reason = new SimpleStringProperty(unavailability.getReason());
+            this.reason = new SimpleStringProperty((String) data.get("reason"));
         }
         
         public String getId() { return id; }
@@ -273,5 +318,10 @@ public class DoctorUnavailabilityController {
         public String getEndDate() { return endDate.get(); }
         public String getTimeRange() { return timeRange.get(); }
         public String getReason() { return reason.get(); }
+        
+        public SimpleStringProperty startDateProperty() { return startDate; }
+        public SimpleStringProperty endDateProperty() { return endDate; }
+        public SimpleStringProperty timeRangeProperty() { return timeRange; }
+        public SimpleStringProperty reasonProperty() { return reason; }
     }
 }

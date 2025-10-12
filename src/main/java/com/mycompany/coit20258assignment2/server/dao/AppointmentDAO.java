@@ -255,6 +255,39 @@ public class AppointmentDAO {
     }
     
     /**
+     * Update appointment date, time, AND status (for rescheduling)
+     */
+    public boolean updateAppointment(String appointmentId, LocalDate newDate, LocalTime newTime, AppointmentStatus newStatus) {
+        String sql = """
+            UPDATE appointments 
+            SET appointment_date = ?, appointment_time = ?, status = ?, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+            """;
+        
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setDate(1, Date.valueOf(newDate));
+            stmt.setTime(2, Time.valueOf(newTime));
+            stmt.setString(3, newStatus.name());
+            stmt.setString(4, appointmentId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("✅ Appointment rescheduled: " + appointmentId + " -> " + newDate + " " + newTime + " [" + newStatus + "]");
+                return true;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Database error rescheduling appointment: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    /**
      * Delete appointment
      */
     public boolean deleteAppointment(String appointmentId) {

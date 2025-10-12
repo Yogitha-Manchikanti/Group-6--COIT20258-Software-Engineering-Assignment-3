@@ -19,7 +19,7 @@
 
     <Label fx:id="title" text="My Data" styleClass="title"/>
 
-    <SplitPane dividerPositions="0.5">
+    <SplitPane dividerPositions="0.25, 0.5, 0.75">
         <items>
             <VBox spacing="8">
                 <Label text="Appointments" style="-fx-font-weight:bold;"/>
@@ -28,6 +28,14 @@
             <VBox spacing="8">
                 <Label text="Prescriptions" style="-fx-font-weight:bold;"/>
                 <ListView fx:id="prescriptionsList" prefHeight="420"/>
+            </VBox>
+            <VBox spacing="8">
+                <Label text="Diagnoses" style="-fx-font-weight:bold;"/>
+                <ListView fx:id="diagnosesList" prefHeight="420"/>
+            </VBox>
+            <VBox spacing="8">
+                <Label text="Referrals" style="-fx-font-weight:bold;"/>
+                <ListView fx:id="referralsList" prefHeight="420"/>
             </VBox>
         </items>
     </SplitPane>

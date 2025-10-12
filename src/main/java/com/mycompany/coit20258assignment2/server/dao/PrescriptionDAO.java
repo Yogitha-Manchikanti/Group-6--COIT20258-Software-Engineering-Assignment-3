@@ -25,8 +25,9 @@ public class PrescriptionDAO {
     public boolean createPrescription(Prescription prescription) {
         String sql = """
             INSERT INTO prescriptions 
-            (id, patient_id, doctor_id, medication, dosage, frequency, start_date, end_date, status, refills_remaining, instructions) 
-            VALUES (?, ?, ?, ?, ?, 'As prescribed', ?, DATE_ADD(?, INTERVAL 30 DAY), ?, 3, 'Follow doctor instructions')
+            (id, patient_id, doctor_id, medication_name, dosage, frequency, 
+             prescribed_date, status, instructions) 
+            VALUES (?, ?, ?, ?, ?, 'As prescribed', ?, ?, 'Follow doctor instructions')
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -38,8 +39,7 @@ public class PrescriptionDAO {
             stmt.setString(4, prescription.getMedication());
             stmt.setString(5, prescription.getDosage());
             stmt.setDate(6, Date.valueOf(prescription.getDate()));
-            stmt.setDate(7, Date.valueOf(prescription.getDate()));
-            stmt.setString(8, prescription.getStatus().name());
+            stmt.setString(7, prescription.getStatus().name());
             
             int rowsAffected = stmt.executeUpdate();
             
@@ -62,11 +62,11 @@ public class PrescriptionDAO {
     public List<Prescription> getPrescriptionsByPatient(String patientId) {
         List<Prescription> prescriptions = new ArrayList<>();
         String sql = """
-            SELECT id, patient_id, doctor_id, medication, dosage, frequency, 
-                   start_date, end_date, status, refills_remaining, instructions 
+            SELECT id, patient_id, doctor_id, medication_name, dosage, frequency, 
+                   prescribed_date, status, instructions 
             FROM prescriptions 
             WHERE patient_id = ? 
-            ORDER BY start_date DESC
+            ORDER BY prescribed_date DESC
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -93,11 +93,11 @@ public class PrescriptionDAO {
     public List<Prescription> getPrescriptionsByDoctor(String doctorId) {
         List<Prescription> prescriptions = new ArrayList<>();
         String sql = """
-            SELECT id, patient_id, doctor_id, medication, dosage, frequency, 
-                   start_date, end_date, status, refills_remaining, instructions 
+            SELECT id, patient_id, doctor_id, medication_name, dosage, frequency, 
+                   prescribed_date, status, instructions 
             FROM prescriptions 
             WHERE doctor_id = ? 
-            ORDER BY start_date DESC
+            ORDER BY prescribed_date DESC
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -123,8 +123,8 @@ public class PrescriptionDAO {
      */
     public Optional<Prescription> getPrescriptionById(String prescriptionId) {
         String sql = """
-            SELECT id, patient_id, doctor_id, medication, dosage, frequency, 
-                   start_date, end_date, status, refills_remaining, instructions 
+            SELECT id, patient_id, doctor_id, medication_name, dosage, frequency, 
+                   prescribed_date, status, instructions 
             FROM prescriptions 
             WHERE id = ?
             """;
@@ -209,13 +209,14 @@ public class PrescriptionDAO {
     
     /**
      * Approve refill (by doctor)
+     * Note: Database doesn't have refills_remaining column
+     * This updates the prescription's updated_at timestamp to indicate refill was processed
      */
     public boolean approveRefill(String prescriptionId) {
         String sql = """
             UPDATE prescriptions 
-            SET status = 'ACTIVE', 
-                updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ? AND status = 'PENDING'
+            SET updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ? AND status = 'ACTIVE'
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -228,10 +229,14 @@ public class PrescriptionDAO {
             if (rowsAffected > 0) {
                 System.out.println("✅ Refill approved for prescription: " + prescriptionId);
                 return true;
+            } else {
+                System.out.println("⚠️ Prescription not found or not active: " + prescriptionId);
+                return false;
             }
             
         } catch (SQLException e) {
             System.err.println("Database error approving refill: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return false;
@@ -243,11 +248,11 @@ public class PrescriptionDAO {
     public List<Prescription> getActivePrescriptions(String patientId) {
         List<Prescription> prescriptions = new ArrayList<>();
         String sql = """
-            SELECT id, patient_id, doctor_id, medication, dosage, frequency, 
-                   start_date, end_date, status, refills_remaining, instructions 
+            SELECT id, patient_id, doctor_id, medication_name, dosage, frequency, 
+                   prescribed_date, status, instructions 
             FROM prescriptions 
-            WHERE patient_id = ? AND status = 'ACTIVE' AND end_date >= CURDATE()
-            ORDER BY start_date DESC
+            WHERE patient_id = ? AND status = 'ACTIVE'
+            ORDER BY prescribed_date DESC
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -274,14 +279,13 @@ public class PrescriptionDAO {
     public List<Prescription> getPrescriptionsNeedingRenewal(String patientId, int daysBeforeExpiry) {
         List<Prescription> prescriptions = new ArrayList<>();
         String sql = """
-            SELECT id, patient_id, doctor_id, medication, dosage, frequency, 
-                   start_date, end_date, status, refills_remaining, instructions 
+            SELECT id, patient_id, doctor_id, medication_name, dosage, frequency, 
+                   prescribed_date, status, instructions 
             FROM prescriptions 
             WHERE patient_id = ? 
               AND status = 'ACTIVE' 
-              AND end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
-              AND refills_remaining = 0
-            ORDER BY end_date
+              AND prescribed_date <= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+            ORDER BY prescribed_date
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -369,9 +373,9 @@ public class PrescriptionDAO {
             rs.getString("id"),
             rs.getString("patient_id"),
             rs.getString("doctor_id"),
-            rs.getString("medication"),
+            rs.getString("medication_name"),
             rs.getString("dosage"),
-            rs.getDate("start_date").toLocalDate(),
+            rs.getDate("prescribed_date").toLocalDate(),
             PrescriptionStatus.valueOf(rs.getString("status"))
         );
     }

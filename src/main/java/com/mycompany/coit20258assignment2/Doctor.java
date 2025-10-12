@@ -8,12 +8,14 @@ public class Doctor extends User {
     public Doctor(String id, String name, String email, String username, String password, String specialization) {
         super(id, name, email, username, password);
         this.specialization = specialization;
+        setUserType(UserType.DOCTOR);
     }
 
     // legacy
     public Doctor(String id, String name, String username, String password, String specialization) {
         super(id, name, username, password);
         this.specialization = specialization;
+        setUserType(UserType.DOCTOR);
     }
 
     public String getSpecialization() { return specialization; }

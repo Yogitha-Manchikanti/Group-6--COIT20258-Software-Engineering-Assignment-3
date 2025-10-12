@@ -24,12 +24,18 @@ public class VitalSignsDAO {
      * Record new vital signs
      */
     public boolean recordVitalSigns(VitalSigns vitals) {
+        // Validate temperature range (database column is DECIMAL(4,2) - max 99.99)
+        if (vitals.getTemperature() < 0 || vitals.getTemperature() > 99.99) {
+            System.err.println("❌ Invalid temperature value: " + vitals.getTemperature() + "°C (must be 0-99.99)");
+            return false;
+        }
+        
         String sql = """
             INSERT INTO vital_signs 
-            (id, patient_id, recorded_by, blood_pressure_systolic, blood_pressure_diastolic, 
-             heart_rate, temperature, respiratory_rate, oxygen_saturation, weight, height, 
-             recorded_at, notes) 
-            VALUES (?, ?, 'SYSTEM', ?, ?, ?, ?, ?, 98.0, 70.0, 170.0, ?, 'Recorded via telehealth')
+            (id, patient_id, pulse_rate, body_temperature, respiration_rate, 
+             blood_pressure_systolic, blood_pressure_diastolic, 
+             recorded_date, recorded_time, notes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Recorded via telehealth')
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -37,17 +43,20 @@ public class VitalSignsDAO {
             
             // Parse blood pressure "120/80" format
             String[] bpParts = vitals.getBloodPressure().split("/");
-            int systolic = Integer.parseInt(bpParts[0]);
-            int diastolic = Integer.parseInt(bpParts[1]);
+            int systolic = Integer.parseInt(bpParts[0].trim());
+            int diastolic = Integer.parseInt(bpParts[1].trim());
+            
+            LocalDateTime timestamp = vitals.getTimestamp();
             
             stmt.setString(1, vitals.getId());
             stmt.setString(2, vitals.getPatientId());
-            stmt.setInt(3, systolic);
-            stmt.setInt(4, diastolic);
-            stmt.setInt(5, vitals.getPulse());
-            stmt.setDouble(6, vitals.getTemperature());
-            stmt.setInt(7, vitals.getRespiration());
-            stmt.setTimestamp(8, Timestamp.valueOf(vitals.getTimestamp()));
+            stmt.setInt(3, vitals.getPulse());               // pulse_rate
+            stmt.setDouble(4, vitals.getTemperature());      // body_temperature
+            stmt.setInt(5, vitals.getRespiration());         // respiration_rate
+            stmt.setInt(6, systolic);                        // blood_pressure_systolic
+            stmt.setInt(7, diastolic);                       // blood_pressure_diastolic
+            stmt.setDate(8, Date.valueOf(timestamp.toLocalDate()));      // recorded_date
+            stmt.setTime(9, Time.valueOf(timestamp.toLocalTime()));      // recorded_time
             
             int rowsAffected = stmt.executeUpdate();
             
@@ -72,10 +81,11 @@ public class VitalSignsDAO {
         List<VitalSigns> vitalsList = new ArrayList<>();
         String sql = """
             SELECT id, patient_id, blood_pressure_systolic, blood_pressure_diastolic, 
-                   heart_rate, temperature, respiratory_rate, recorded_at 
+                   pulse_rate, body_temperature, respiration_rate, 
+                   recorded_date, recorded_time 
             FROM vital_signs 
             WHERE patient_id = ? 
-            ORDER BY recorded_at DESC
+            ORDER BY recorded_date DESC, recorded_time DESC
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -102,10 +112,11 @@ public class VitalSignsDAO {
     public Optional<VitalSigns> getLatestVitalSigns(String patientId) {
         String sql = """
             SELECT id, patient_id, blood_pressure_systolic, blood_pressure_diastolic, 
-                   heart_rate, temperature, respiratory_rate, recorded_at 
+                   pulse_rate, body_temperature, respiration_rate, 
+                   recorded_date, recorded_time 
             FROM vital_signs 
             WHERE patient_id = ? 
-            ORDER BY recorded_at DESC 
+            ORDER BY recorded_date DESC, recorded_time DESC 
             LIMIT 1
             """;
         
@@ -191,14 +202,20 @@ public class VitalSignsDAO {
     private VitalSigns createVitalSignsFromResultSet(ResultSet rs) throws SQLException {
         String bloodPressure = rs.getInt("blood_pressure_systolic") + "/" + rs.getInt("blood_pressure_diastolic");
         
+        // Combine date and time into LocalDateTime
+        LocalDateTime timestamp = LocalDateTime.of(
+            rs.getDate("recorded_date").toLocalDate(),
+            rs.getTime("recorded_time").toLocalTime()
+        );
+        
         return new VitalSigns(
             rs.getString("id"),
             rs.getString("patient_id"),
-            rs.getInt("heart_rate"),
-            rs.getDouble("temperature"),
-            rs.getInt("respiratory_rate"),
+            rs.getInt("pulse_rate"),
+            rs.getDouble("body_temperature"),
+            rs.getInt("respiration_rate"),
             bloodPressure,
-            rs.getTimestamp("recorded_at").toLocalDateTime()
+            timestamp
         );
     }
 }

@@ -1,33 +1,51 @@
 package com.mycompany.coit20258assignment2;
 
+import com.mycompany.coit20258assignment2.client.ClientService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the "Create Referral" page.
- * Doctors select a patient from a dropdown (by name), enter destination and reason,
- * and a referral record is saved.
+ * ASSIGNMENT 3: Server-only mode - loads patients from database, saves referrals to database
  */
 public class ReferralFormController {
 
-    @FXML private ComboBox<String> patientBox;   // items like "P001 - Alice Patient"
+    @FXML private ComboBox<String> patientBox;   // items like "pat001"
     @FXML private TextField destinationField;
+    @FXML private TextField specialtyField;
     @FXML private TextArea reasonArea;
     @FXML private Label message;
 
-    private final DataStore store = new DataStore("data");
+    private final ClientService clientService = ClientService.getInstance();
 
     @FXML
     public void initialize() {
-        // populate patient names (ID - Name)
-        var patients = store.getUsers().stream()
-                .filter(u -> u instanceof Patient)
-                .map(u -> u.getId() + " - " + u.getName())
-                .toList();
-        patientBox.setItems(FXCollections.observableArrayList(patients));
+        if (!clientService.isConnected()) {
+            message.setText("Server not available. Please ensure THSServer is running.");
+            message.setStyle("-fx-text-fill: red;");
+            return;
+        }
+        
+        // Load patients from server by getting appointments
+        System.out.println("Loading patients from appointments...");
+        List<Appointment> appointments = clientService.getAppointments();
+        
+        // Get unique patient IDs from appointments
+        List<String> patientIds = appointments.stream()
+                .map(Appointment::getPatientId)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        
+        System.out.println("Found " + patientIds.size() + " patients");
+        
+        patientBox.setItems(FXCollections.observableArrayList(patientIds));
     }
 
     @FXML
@@ -35,49 +53,70 @@ public class ReferralFormController {
         try {
             if (!Session.isDoctor()) {
                 message.setText("Only doctors can create referrals.");
+                message.setStyle("-fx-text-fill: red;");
                 return;
             }
-            String selected = patientBox.getValue();
-            if (selected == null || selected.isBlank()) {
+            
+            if (!clientService.isConnected()) {
+                message.setText("Server not available.");
+                message.setStyle("-fx-text-fill: red;");
+                return;
+            }
+            
+            String patientId = patientBox.getValue();
+            if (patientId == null || patientId.isBlank()) {
                 message.setText("Please select a patient.");
+                message.setStyle("-fx-text-fill: orange;");
                 return;
             }
-            String patientId = selected.split(" - ")[0];
 
             String destination = destinationField.getText().trim();
+            String specialty = specialtyField.getText().trim();
             String reason = reasonArea.getText().trim();
 
             if (destination.isEmpty() || reason.isEmpty()) {
                 message.setText("Destination and reason are required.");
+                message.setStyle("-fx-text-fill: orange;");
                 return;
             }
 
-            // Build and persist referral
-            String id = "R" + java.util.UUID.randomUUID().toString().substring(0, 7);
+            // Build referral
+            String id = "REF" + UUID.randomUUID().toString().substring(0, 7);
             String doctorId = Session.id();
-            Referral ref = new Referral(
-                    id,
-                    patientId,
-                    doctorId,
-                    destination,
-                    reason,
-                    LocalDate.now()
+            
+            System.out.println("Creating referral...");
+            System.out.println("   ID: " + id);
+            System.out.println("   Patient: " + patientId);
+            System.out.println("   Doctor: " + doctorId);
+            System.out.println("   Destination: " + destination);
+            System.out.println("   Specialty: " + specialty);
+            
+            boolean success = clientService.createReferral(
+                id, patientId, doctorId, destination, specialty, reason, LocalDate.now().toString()
             );
-
-            var list = store.getReferrals();
-            list.add(ref);
-            store.saveReferrals(list);
-
-            message.setText("Referral created for " + store.findPatientName(patientId) + ".");
-            // clear inputs
-            destinationField.clear();
-            reasonArea.clear();
-            patientBox.getSelectionModel().clearSelection();
+            
+            if (success) {
+                System.out.println("Referral created successfully");
+                message.setText("Referral created (ID: " + id + ")");
+                message.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+                
+                // clear inputs
+                destinationField.clear();
+                specialtyField.clear();
+                reasonArea.clear();
+                patientBox.getSelectionModel().clearSelection();
+            } else {
+                System.err.println("Failed to create referral");
+                message.setText("Failed to create referral. Check server console.");
+                message.setStyle("-fx-text-fill: red;");
+            }
         } catch (Exception e) {
             message.setText("Error: " + e.getMessage());
+            message.setStyle("-fx-text-fill: red;");
+            e.printStackTrace();
         }
     }
 
-    @FXML public void onBack()   { SceneNavigator.getInstance().goToDoctorDashboard(); }
+    @FXML public void onBack() { SceneNavigator.getInstance().goToDoctorDashboard(); }
     @FXML public void onLogout() { Session.logout(); SceneNavigator.getInstance().goToLogin(); }
 }
