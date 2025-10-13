@@ -36,7 +36,7 @@
 - ✅ **Remote Vital Signs Monitoring**
 - ✅ **Prescription Refill Management**
 - ✅ **Doctor Unavailability Management** (Extra Feature)
-- ✅ **Database Optimization & Backup**
+- ✅ **Password Encryption/Decryption** (Base64 Security)
 - ✅ **Admin Appointment Viewer**
 - ✅ **Comprehensive Testing Suite**
 
@@ -54,6 +54,7 @@
 - 🔑 **Password Reset** (temporary password reset via username/email)
 - 💾 Database-backed user storage
 - 🔒 Session management
+- 🔐 **Password Encryption/Decryption** (Base64 encoding for data security)
 
 #### 2. **Appointment Management**
 - 📅 Book appointments with doctors
@@ -122,15 +123,10 @@
 - 📊 6 optimized views
 - 🔧 9 stored procedures
 - 🔔 2 validation triggers
+- � Password encryption (Base64 encoding)
+- � Comprehensive setup script
 
-#### 10. **Automated Backup System**
-- 💾 PowerShell backup script
-- 📅 30-day retention policy
-- ⏰ Scheduled backups
-- 📧 Email notifications
-- 🔄 Point-in-time recovery
-
-#### 11. **Admin Dashboard**
+#### 10. **Admin Dashboard**
 - 📊 View all system appointments
 - 👥 Patient/Doctor name resolution
 - 🎨 Color-coded status indicators
@@ -644,11 +640,7 @@ THS-Enhanced/
 │       └── java/com/mycompany/coit20258assignment2/
 │           └── ClientTest.java                   # Integration tests
 │
-├── setup_database.sql            # MySQL setup script
-├── optimize_database.sql         # Performance optimization
-├── backup_database.sql           # Backup procedures
-├── backup_ths_database.ps1       # Automated backup script
-│
+├── setup_database.sql            # Complete MySQL setup with encrypted passwords
 ├── pom.xml                       # Maven configuration
 ├── .gitignore                    # Git ignore rules
 └── README.md                     # This file
@@ -690,10 +682,10 @@ THS-Enhanced/
 
 | Member | Role | Responsibilities |
 |--------|------|------------------|
-| **Member 1** | Server Lead | TCP Server, DAOs, Database Integration |
+| **Member 1** | Team Leader + Server + Database Lead | TCP Server, DAOs, Database Integration, Encryption |
 | **Member 2** | Client Lead | Socket Client, ClientService, GUI Integration |
-| **Member 3** | Database Lead | Optimization, Backup, Documentation |
-| **Member 4** | Admin Management | Admin features, Extra features |
+| **Member 3** | Database/Service Lead | Service Layer, Models, Business Logic |
+| **Member 4** | UI Features Lead | Admin Dashboard, Forms, UI Components |
 
 ---
 
@@ -858,7 +850,7 @@ kill -9 <PID>
 
 ✅ **Extra Features:**
 - Doctor Unavailability Management
-- Database Optimization & Backup
+- Password Encryption/Decryption (Base64)
 - Admin Dashboard
 - User Signup & Password Reset
 - Comprehensive Documentation
@@ -916,7 +908,8 @@ For issues, questions, or contributions:
 - ✅ Remote vital signs monitoring
 - ✅ Prescription refill management
 - ✅ Doctor unavailability feature
-- ✅ Database optimization
+- ✅ Password encryption/decryption (Base64)
+- ✅ User signup & password reset
 - ✅ Admin dashboard
 - ✅ Comprehensive testing
 

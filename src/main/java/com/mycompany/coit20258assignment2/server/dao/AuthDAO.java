@@ -2,12 +2,14 @@ package com.mycompany.coit20258assignment2.server.dao;
 
 import com.mycompany.coit20258assignment2.*;
 import com.mycompany.coit20258assignment2.server.DatabaseManager;
+import com.mycompany.coit20258assignment2.util.EncryptionUtil;
 import java.sql.*;
 import java.util.Optional;
 
 /**
  * Data Access Object for User Authentication
  * Server Lead responsibility: Database operations for user login/auth
+ * Uses EncryptionUtil for password encryption/decryption
  */
 public class AuthDAO {
     private final DatabaseManager dbManager;
@@ -18,12 +20,13 @@ public class AuthDAO {
     
     /**
      * Authenticate user by email/username and password
+     * Decrypts stored password and compares with provided password
      */
     public Optional<User> authenticateUser(String identifier, String password) {
         String sql = """
             SELECT id, name, email, username, password, user_type, specialization 
             FROM users 
-            WHERE (email = ? OR username = ?) AND password = ?
+            WHERE (email = ? OR username = ?)
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -31,7 +34,6 @@ public class AuthDAO {
             
             stmt.setString(1, identifier);
             stmt.setString(2, identifier);
-            stmt.setString(3, password);
             
             ResultSet rs = stmt.executeQuery();
             
@@ -41,14 +43,24 @@ public class AuthDAO {
                 String name = rs.getString("name");
                 String email = rs.getString("email");
                 String username = rs.getString("username");
-                String pwd = rs.getString("password");
+                String encryptedPassword = rs.getString("password");
                 String specialization = rs.getString("specialization");
+                
+                // Decrypt password and verify
+                String decryptedPassword = EncryptionUtil.decrypt(encryptedPassword);
+                
+                if (!decryptedPassword.equals(password)) {
+                    System.out.println("❌ Password mismatch for user: " + identifier);
+                    return Optional.empty();
+                }
+                
+                System.out.println("✅ Password verified for user: " + identifier);
                 
                 // Create appropriate user type
                 User user = switch (userType) {
-                    case "PATIENT" -> new Patient(id, name, email, username, pwd);
-                    case "DOCTOR" -> new Doctor(id, name, email, username, pwd, specialization);
-                    case "ADMINISTRATOR" -> new Administrator(id, name, email, username, pwd);
+                    case "PATIENT" -> new Patient(id, name, email, username, decryptedPassword);
+                    case "DOCTOR" -> new Doctor(id, name, email, username, decryptedPassword, specialization);
+                    case "ADMINISTRATOR" -> new Administrator(id, name, email, username, decryptedPassword);
                     default -> throw new IllegalArgumentException("Unknown user type: " + userType);
                 };
                 
@@ -78,17 +90,21 @@ public class AuthDAO {
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
+            // Encrypt password before storing
+            String encryptedPassword = EncryptionUtil.encrypt(user.getPassword());
+            
             stmt.setString(1, user.getId());
             stmt.setString(2, user.getName());
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getUsername());
-            stmt.setString(5, user.getPassword());
+            stmt.setString(5, encryptedPassword);
             stmt.setString(6, userType);
             stmt.setString(7, user instanceof Doctor ? ((Doctor) user).getSpecialization() : null);
             
             int rowsAffected = stmt.executeUpdate();
             
             if (rowsAffected > 0) {
+                System.out.println("✅ User created with encrypted password: " + user.getUsername());
                 logUserSession(user.getId(), "ACCOUNT_CREATED");
                 return true;
             }
@@ -103,6 +119,7 @@ public class AuthDAO {
     
     /**
      * Update user password
+     * Encrypts the new password before storing
      */
     public boolean updatePassword(String userId, String newPassword) {
         String sql = "UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
@@ -110,12 +127,16 @@ public class AuthDAO {
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, newPassword);
+            // Encrypt new password
+            String encryptedPassword = EncryptionUtil.encrypt(newPassword);
+            
+            stmt.setString(1, encryptedPassword);
             stmt.setString(2, userId);
             
             int rowsAffected = stmt.executeUpdate();
             
             if (rowsAffected > 0) {
+                System.out.println("✅ Password updated with encryption for user: " + userId);
                 logUserSession(userId, "PASSWORD_CHANGED");
                 return true;
             }
@@ -129,6 +150,7 @@ public class AuthDAO {
     
     /**
      * Reset password by username or email
+     * Encrypts the new password before storing
      */
     public boolean resetPassword(String identifier, String newPassword) {
         String sql = "UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE username = ? OR email = ?";
@@ -136,7 +158,10 @@ public class AuthDAO {
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, newPassword);
+            // Encrypt new password
+            String encryptedPassword = EncryptionUtil.encrypt(newPassword);
+            
+            stmt.setString(1, encryptedPassword);
             stmt.setString(2, identifier);
             stmt.setString(3, identifier);
             

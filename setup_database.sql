@@ -4,26 +4,34 @@
 -- Last Updated: October 13, 2025
 --
 -- Features Implemented:
--- 1. User Management (signup, password reset)
+-- 1. User Management (signup, password reset, encryption)
 -- 2. Appointment Management (with doctor unavailability checking)
 -- 3. Prescription Management (with refill requests)
 -- 4. Vital Signs Monitoring (remote data submission)
 -- 5. Diagnoses & Referrals
 -- 6. Doctor Unavailability Management
 -- 7. Session Logging & Audit Trail
+-- 8. Password Encryption (Base64 encoding)
 --
 -- New in Latest Update:
 -- - Server-based user signup (auto-generates patient IDs: pat###)
 -- - Password reset functionality (resets to temporary password: reset123)
+-- - Password encryption/decryption using Base64 encoding
 -- - All authentication now handled by AuthDAO with database storage
 -- - Removed dependency on DataStore (.dat files)
 --
--- Test Accounts:
+-- Security Features:
+-- - Passwords stored in encrypted format (Base64)
+-- - Automatic encryption on signup/password change
+-- - Automatic decryption during authentication
+--
+-- Test Accounts (use original passwords to login):
 -- Admin: admin / admin123
 -- Doctor: drjohnson / doctor123
 -- Patient: jsmith / patient123
 -- 
--- To create new accounts: Use the signup feature on client application
+-- Note: Passwords are encrypted in database but you login with plain text
+-- The system automatically encrypts/decrypts as needed
 
 CREATE DATABASE IF NOT EXISTS ths_enhanced;
 USE ths_enhanced;
@@ -170,18 +178,22 @@ INSERT INTO system_settings (setting_key, setting_value, description) VALUES
 ('encryption_enabled', 'true', 'Enable data encryption'),
 ('audit_logging', 'true', 'Enable audit logging');
 
--- Sample users (based on existing AuthService seed data)
+-- Sample users with encrypted passwords (Base64 encoded)
+-- Password Encryption: Base64 encoding for data security
+-- Admin password: admin123 -> YWRtaW4xMjM=
+-- Doctor password: doctor123 -> ZG9jdG9yMTIz
+-- Patient password: patient123 -> cGF0aWVudDEyMw==
 INSERT INTO users (id, name, email, username, password, user_type, specialization) VALUES 
-('admin001', 'System Administrator', 'admin@ths.com', 'admin', 'admin123', 'ADMINISTRATOR', NULL),
-('doc001', 'Dr. Sarah Johnson', 'sarah.johnson@ths.com', 'drjohnson', 'doctor123', 'DOCTOR', 'Cardiology'),
-('doc002', 'Dr. Michael Chen', 'michael.chen@ths.com', 'drchen', 'doctor123', 'DOCTOR', 'General Practice'),
-('doc003', 'Dr. Emily Rodriguez', 'emily.rodriguez@ths.com', 'drodriguez', 'doctor123', 'DOCTOR', 'Pediatrics'),
-('doc004', 'Dr. James Wilson', 'james.wilson@ths.com', 'drwilson', 'doctor123', 'DOCTOR', 'Dermatology'),
-('pat001', 'John Smith', 'john.smith@email.com', 'jsmith', 'patient123', 'PATIENT', NULL),
-('pat002', 'Mary Johnson', 'mary.johnson@email.com', 'mjohnson', 'patient123', 'PATIENT', NULL),
-('pat003', 'Robert Brown', 'robert.brown@email.com', 'rbrown', 'patient123', 'PATIENT', NULL),
-('pat004', 'Lisa Davis', 'lisa.davis@email.com', 'ldavis', 'patient123', 'PATIENT', NULL),
-('pat005', 'David Wilson', 'david.wilson@email.com', 'dwilson', 'patient123', 'PATIENT', NULL);
+('admin001', 'System Administrator', 'admin@ths.com', 'admin', 'YWRtaW4xMjM=', 'ADMINISTRATOR', NULL),
+('doc001', 'Dr. Sarah Johnson', 'sarah.johnson@ths.com', 'drjohnson', 'ZG9jdG9yMTIz', 'DOCTOR', 'Cardiology'),
+('doc002', 'Dr. Michael Chen', 'michael.chen@ths.com', 'drchen', 'ZG9jdG9yMTIz', 'DOCTOR', 'General Practice'),
+('doc003', 'Dr. Emily Rodriguez', 'emily.rodriguez@ths.com', 'drodriguez', 'ZG9jdG9yMTIz', 'DOCTOR', 'Pediatrics'),
+('doc004', 'Dr. James Wilson', 'james.wilson@ths.com', 'drwilson', 'ZG9jdG9yMTIz', 'DOCTOR', 'Dermatology'),
+('pat001', 'John Smith', 'john.smith@email.com', 'jsmith', 'cGF0aWVudDEyMw==', 'PATIENT', NULL),
+('pat002', 'Mary Johnson', 'mary.johnson@email.com', 'mjohnson', 'cGF0aWVudDEyMw==', 'PATIENT', NULL),
+('pat003', 'Robert Brown', 'robert.brown@email.com', 'rbrown', 'cGF0aWVudDEyMw==', 'PATIENT', NULL),
+('pat004', 'Lisa Davis', 'lisa.davis@email.com', 'ldavis', 'cGF0aWVudDEyMw==', 'PATIENT', NULL),
+('pat005', 'David Wilson', 'david.wilson@email.com', 'dwilson', 'cGF0aWVudDEyMw==', 'PATIENT', NULL);
 
 -- Sample appointments
 INSERT INTO appointments (id, patient_id, doctor_id, appointment_date, appointment_time, status) VALUES 
