@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mycompany.coit20258assignment2.DoctorDashboardController"
+      spacing="16">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Top bar -->
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <children>
+            <Label fx:id="welcome" style="-fx-font-size:20; -fx-font-weight:bold;"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#onLogout" styleClass="btn-logout"/>
+        </children>
+    </HBox>
+
+    <!-- Actions -->
+    <TilePane hgap="14" vgap="14" prefColumns="4">
+        <children>
+            <Button text="View/Change Bookings" onAction="#openBookingEditor"      prefWidth="240" prefHeight="60"/>
+            <Button text="Record Diagnosis"     onAction="#openDiagnosisForm"      prefWidth="240" prefHeight="60"/>
+            <Button text="Create Referral"      onAction="#openReferralForm"       prefWidth="240" prefHeight="60"/>
+            <Button text="Review Prescriptions" onAction="#openPrescriptionReview" prefWidth="240" prefHeight="60"/>
+            <Button text="Manage Unavailability" onAction="#openUnavailability"    prefWidth="240" prefHeight="60" style="-fx-background-color: #e67e22; -fx-text-fill: white;"/>
+            <Button text="My Data"              onAction="#openMyData"             prefWidth="240" prefHeight="60"/>
+        </children>
+    </TilePane>
+
+</VBox>
