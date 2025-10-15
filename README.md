@@ -192,15 +192,9 @@ private static final String DB_PASSWORD = "ths_pass";  // Change if needed
 
 ## ▶️ Running the Application
 
-### Option 1: Local Mode (Recommended for Quick Testing)
+### Option 1: Running from NetBeans IDE (Recommended)
 
-**No server or database required!**
-
-1. In NetBeans, press **F6** (or click the green ▶️ Run button)
-2. Application launches with local file storage
-3. Login with default credentials (see below)
-
-### Option 2: Server Mode (Full Client-Server Architecture)
+The recommended way to run the application is directly from NetBeans IDE for development and testing.
 
 #### Step 1: Start the MySQL Server
 
@@ -218,7 +212,7 @@ sudo systemctl start mysql
 #### Step 2: Start the TCP Server
 
 **Option A: From NetBeans**
-1. Right-click on `THSServer.java`
+1. Right-click on `THSServer.java` in the project explorer
 2. Select **Run File**
 3. Server starts on port 8080
 
@@ -237,17 +231,85 @@ java -cp target/classes com.mycompany.coit20258assignment2.THSServer
 
 #### Step 3: Start the JavaFX Client
 
-1. In NetBeans, press **F6**
-2. On the login screen, check the box: **☑ Use Server Authentication**
-3. Login with credentials
+1. In NetBeans, press **F6** or click the **Run** button
+2. The JavaFX client window will open automatically
+3. On the login screen, check the box: **☑ Use Server Authentication**
+4. Login with default credentials (see User Guide section below)
 
 #### Step 4: Verify Connection
 
-When login successful, you'll see server logs:
+When login is successful, you'll see server logs in the NetBeans output window:
 ```
-✅ Client connected from /127.0.0.1:xxxxx
-📨 Handling request: LOGIN
-✅ Login successful: john.smith
+✅ New client connected: /127.0.0.1 (Active connections: 1)
+📨 Processing request: LOGIN from Client-/127.0.0.1:xxxxx
+✅ Login successful for: username
+```
+
+---
+
+### Option 2: Using Executable JAR Files (Alternative)
+
+For deployment or when NetBeans is not available, you can use the pre-built executable JAR files.
+
+#### Step 1: Start the MySQL Server
+
+```bash
+# Windows
+net start MySQL80
+
+# macOS
+mysql.server start
+
+# Linux
+sudo systemctl start mysql
+```
+
+#### Step 2: Start the TCP Server
+
+**Using the Server JAR:**
+```bash
+# Navigate to project directory
+cd Group-6--COIT20258-Software-Engineering-Assignment-3
+
+# Run the server JAR
+java -jar target/THS-Enhanced-Server.jar
+```
+
+**Expected Output:**
+```
+🚀 THS-Enhanced Server initialized on port 8080
+🔄 THS-Enhanced Server starting...
+✅ Database connection successful!
+📊 Connected to: jdbc:mysql://localhost:3306/ths_enhanced
+✅ Server ready for client connections on port 8080
+```
+
+#### Step 3: Start the JavaFX Client
+
+**Open a new terminal/command prompt and run:**
+```bash
+# Navigate to project directory (if not already there)
+cd Group-6--COIT20258-Software-Engineering-Assignment-3
+
+# Run the client JAR
+java -jar target/THS-Enhanced-Client.jar
+```
+
+The JavaFX client window will open automatically.
+
+#### Step 4: Login and Use the Application
+
+1. On the login screen, check the box: **☑ Use Server Authentication**
+2. Login with default credentials (see User Guide section below)
+3. The client will automatically connect to the server
+
+#### Step 5: Verify Connection
+
+When login is successful, you'll see server logs in the server terminal:
+```
+✅ New client connected: /127.0.0.1 (Active connections: 1)
+📨 Processing request: LOGIN from Client-/127.0.0.1:xxxxx
+✅ Login successful for: username
 ```
 
 ---
