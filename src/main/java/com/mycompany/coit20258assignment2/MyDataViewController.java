@@ -24,6 +24,7 @@ public class MyDataViewController {
     @FXML private ListView<String> prescriptionsList;
     @FXML private ListView<String> diagnosesList;
     @FXML private ListView<String> referralsList;
+    @FXML private ListView<String> vitalSignsList;
 
     private final ClientService clientService = ClientService.getInstance();
     private final DateTimeFormatter D = DateTimeFormatter.ISO_LOCAL_DATE;
@@ -59,23 +60,31 @@ public class MyDataViewController {
         List<Appointment> appointments = clientService.getAppointments();
         List<Prescription> prescriptions = clientService.getPrescriptions();
         
-        // Appointments (patient view)
+        // Appointments (patient view) - now with doctor names
         List<String> appts = appointments.stream()
                 .filter(a -> a.getPatientId().equals(patientId))
-                .map(a -> String.format("%s on %s at %s - Status: %s",
-                        a.getId(),
-                        a.getDate().format(D),
-                        a.getTime(),
-                        a.getStatus()))
+                .map(a -> {
+                    String doctorName = findUserName(a.getDoctorId());
+                    return String.format("%s on %s at %s with Dr. %s - Status: %s",
+                            a.getId(),
+                            a.getDate().format(D),
+                            a.getTime(),
+                            doctorName != null ? doctorName : a.getDoctorId(),
+                            a.getStatus());
+                })
                 .toList();
 
-        // Prescriptions (patient view)
+        // Prescriptions (patient view) - now with doctor names
         List<String> rxs = prescriptions.stream()
                 .filter(p -> p.getPatientId().equals(patientId))
-                .map(p -> String.format("%s — %s (%s)",
-                        p.getDate().format(D),
-                        p.getMedication(),
-                        p.getStatus()))
+                .map(p -> {
+                    String doctorName = findUserName(p.getDoctorId());
+                    return String.format("%s — %s (%s) by Dr. %s",
+                            p.getDate().format(D),
+                            p.getMedication(),
+                            p.getStatus(),
+                            doctorName != null ? doctorName : p.getDoctorId());
+                })
                 .toList();
 
         appointmentsList.getItems().setAll(appts);
@@ -128,8 +137,26 @@ public class MyDataViewController {
                 .toList();
         referralsList.getItems().setAll(refs);
         
+        // Get vital signs from server
+        List<VitalSigns> vitalSigns = clientService.getVitalSigns(patientId);
+        List<String> vitals = vitalSigns.stream()
+                .map(v -> {
+                    String date = v.getTimestamp().toLocalDate().format(D);
+                    String time = v.getTimestamp().toLocalTime().toString();
+                    String bp = v.getBloodPressure();
+                    int pulse = v.getPulse();
+                    double temp = v.getTemperature();
+                    int resp = v.getRespiration();
+                    
+                    return String.format("%s %s - BP: %s, Pulse: %d bpm, Temp: %.1f°C, Resp: %d/min",
+                            date, time, bp, pulse, temp, resp);
+                })
+                .toList();
+        vitalSignsList.getItems().setAll(vitals);
+        
         message.setText(appts.size() + " appointments, " + rxs.size() + " prescriptions, " + 
-                       diags.size() + " diagnoses, " + refs.size() + " referrals");
+                       diags.size() + " diagnoses, " + refs.size() + " referrals, " + 
+                       vitals.size() + " vital signs records");
     }
 
     private void loadDoctorData(String doctorId) {
@@ -143,25 +170,31 @@ public class MyDataViewController {
         List<Appointment> appointments = clientService.getAppointments();
         List<Prescription> prescriptions = clientService.getPrescriptions();
         
-        // Appointments (doctor view)
+        // Appointments (doctor view) - now with patient names
         List<String> appts = appointments.stream()
                 .filter(a -> a.getDoctorId().equals(doctorId))
-                .map(a -> String.format("%s on %s at %s - Patient: %s - Status: %s",
-                        a.getId(),
-                        a.getDate().format(D),
-                        a.getTime(),
-                        a.getPatientId(),
-                        a.getStatus()))
+                .map(a -> {
+                    String patientName = findUserName(a.getPatientId());
+                    return String.format("%s on %s at %s - Patient: %s - Status: %s",
+                            a.getId(),
+                            a.getDate().format(D),
+                            a.getTime(),
+                            patientName != null ? patientName : a.getPatientId(),
+                            a.getStatus());
+                })
                 .toList();
 
-        // Prescriptions (doctor view)
+        // Prescriptions (doctor view) - now with patient names
         List<String> rxs = prescriptions.stream()
                 .filter(p -> p.getDoctorId().equals(doctorId))
-                .map(p -> String.format("%s Patient: %s — %s (%s)",
-                        p.getDate().format(D),
-                        p.getPatientId(),
-                        p.getMedication(),
-                        p.getStatus()))
+                .map(p -> {
+                    String patientName = findUserName(p.getPatientId());
+                    return String.format("%s Patient: %s — %s (%s)",
+                            p.getDate().format(D),
+                            patientName != null ? patientName : p.getPatientId(),
+                            p.getMedication(),
+                            p.getStatus());
+                })
                 .toList();
 
         appointmentsList.getItems().setAll(appts);
@@ -273,6 +306,23 @@ public class MyDataViewController {
     }
 
     // ---- helpers -----------------------------------------------------------
+
+    /**
+     * Find user name by ID from server
+     */
+    private String findUserName(String userId) {
+        try {
+            List<User> users = clientService.getUsers();
+            for (User user : users) {
+                if (user.getId().equals(userId)) {
+                    return user.getName();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error finding user name: " + e.getMessage());
+        }
+        return userId; // Return ID if name not found
+    }
 
     private static String escapeCsv(String s) {
         if (s.contains(",") || s.contains("\"") || s.contains("\n")) {

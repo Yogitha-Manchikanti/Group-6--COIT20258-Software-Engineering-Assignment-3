@@ -24,7 +24,7 @@ public class DiagnosisDAO {
      * - diagnosis_description (text NOT NULL) <- maps from treatmentPlan
      * - notes (text) <- maps from notes
      * - diagnosis_date (date NOT NULL) <- maps from timestamp
-     * - severity, diagnosis_code, appointment_id are set to NULL
+     * - severity, icd_code, appointment_id are set to NULL
      */
     public boolean createDiagnosis(String id, String patientId, String doctorId, 
                                    String notes, String treatmentPlan, String timestamp) {
@@ -71,14 +71,14 @@ public class DiagnosisDAO {
     
     /**
      * Create a new diagnosis record with all database fields
-     * Supports: diagnosis_code, diagnosis_description, severity, notes, diagnosis_date
+     * Supports: icd_code, diagnosis_description, severity, notes, diagnosis_date
      */
     public boolean createDiagnosisExtended(String id, String patientId, String doctorId,
                                           String diagnosisCode, String diagnosisDescription,
                                           String severity, String notes, String timestamp) {
         String sql = """
             INSERT INTO diagnoses 
-            (id, patient_id, doctor_id, diagnosis_code, diagnosis_description, severity, notes, diagnosis_date) 
+            (id, patient_id, doctor_id, icd_code, diagnosis_description, severity, notes, diagnosis_date) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """;
         
@@ -123,12 +123,12 @@ public class DiagnosisDAO {
     
     /**
      * Get all diagnoses for a patient
-     * Returns full database fields including diagnosis_code, severity, appointment_id
+     * Returns full database fields including icd_code, severity, appointment_id
      */
     public java.util.List<java.util.Map<String, Object>> getDiagnosesByPatient(String patientId) {
         String sql = """
             SELECT id, patient_id, doctor_id, appointment_id, 
-                   diagnosis_code, diagnosis_description, severity, 
+                   icd_code, diagnosis_description, severity, 
                    notes, diagnosis_date, created_at
             FROM diagnoses 
             WHERE patient_id = ? 
@@ -149,7 +149,7 @@ public class DiagnosisDAO {
                 diagnosis.put("patientId", rs.getString("patient_id"));
                 diagnosis.put("doctorId", rs.getString("doctor_id"));
                 diagnosis.put("appointmentId", rs.getString("appointment_id"));
-                diagnosis.put("diagnosisCode", rs.getString("diagnosis_code"));
+                diagnosis.put("diagnosisCode", rs.getString("icd_code"));
                 diagnosis.put("diagnosisDescription", rs.getString("diagnosis_description"));
                 diagnosis.put("severity", rs.getString("severity"));
                 diagnosis.put("notes", rs.getString("notes"));
@@ -179,7 +179,7 @@ public class DiagnosisDAO {
     public java.util.List<java.util.Map<String, Object>> getDiagnosesByDoctor(String doctorId) {
         String sql = """
             SELECT id, patient_id, doctor_id, appointment_id, 
-                   diagnosis_code, diagnosis_description, severity, 
+                   icd_code, diagnosis_description, severity, 
                    notes, diagnosis_date, created_at
             FROM diagnoses 
             WHERE doctor_id = ? 
@@ -200,7 +200,7 @@ public class DiagnosisDAO {
                 diagnosis.put("patientId", rs.getString("patient_id"));
                 diagnosis.put("doctorId", rs.getString("doctor_id"));
                 diagnosis.put("appointmentId", rs.getString("appointment_id"));
-                diagnosis.put("diagnosisCode", rs.getString("diagnosis_code"));
+                diagnosis.put("diagnosisCode", rs.getString("icd_code"));
                 diagnosis.put("diagnosisDescription", rs.getString("diagnosis_description"));
                 diagnosis.put("severity", rs.getString("severity"));
                 diagnosis.put("notes", rs.getString("notes"));

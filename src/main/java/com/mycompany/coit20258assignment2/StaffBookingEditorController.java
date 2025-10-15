@@ -33,7 +33,7 @@ public class StaffBookingEditorController {
             return;
         }
         
-        // Custom renderer to show PATIENT ID + time + status
+        // Custom renderer to show PATIENT NAME + time + status
         appointmentList.setCellFactory(lv -> new ListCell<>() {
             @Override protected void updateItem(Appointment a, boolean empty) {
                 super.updateItem(a, empty);
@@ -41,8 +41,9 @@ public class StaffBookingEditorController {
                     setText(null); 
                     return; 
                 }
-                // Show patient ID directly (no name lookup needed)
-                setText(a.getPatientId() + " — " + a.getDate() + ", " + 
+                // Show patient name instead of ID
+                String patientName = findUserName(a.getPatientId());
+                setText(patientName + " — " + a.getDate() + ", " + 
                        a.getTime().format(time12) + "  [" + a.getStatus() + "]");
             }
         });
@@ -114,11 +115,11 @@ public class StaffBookingEditorController {
                 appt.getId(), 
                 d, 
                 newTime, 
-                AppointmentStatus.RESCHEDULED
+                AppointmentStatus.CONFIRMED
             );
             
             if (success) {
-                message.setText("✅ Rescheduled " + appt.getId());
+                message.setText("✅ Appointment updated: " + appt.getId());
                 message.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
                 onLoad(); // Reload list
             } else {
@@ -175,4 +176,21 @@ public class StaffBookingEditorController {
 
     @FXML public void onBack()   { SceneNavigator.getInstance().goToDoctorDashboard(); }
     @FXML public void onLogout() { Session.logout(); SceneNavigator.getInstance().goToLogin(); }
+    
+    /**
+     * Find user name by ID from server
+     */
+    private String findUserName(String userId) {
+        try {
+            List<User> users = clientService.getUsers();
+            for (User user : users) {
+                if (user.getId().equals(userId)) {
+                    return user.getName();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error finding user name: " + e.getMessage());
+        }
+        return userId; // Return ID if name not found
+    }
 }

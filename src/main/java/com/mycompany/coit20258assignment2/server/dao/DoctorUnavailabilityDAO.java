@@ -26,8 +26,8 @@ public class DoctorUnavailabilityDAO {
                                        String startTime, String endTime, boolean isAllDay, String reason) {
         String sql = """
             INSERT INTO doctor_unavailability 
-            (id, doctor_id, start_date, end_date, start_time, end_time, is_all_day, reason) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (id, doctor_id, start_date, end_date, start_time, end_time, reason) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -46,8 +46,7 @@ public class DoctorUnavailabilityDAO {
                 stmt.setTime(6, Time.valueOf(LocalTime.parse(endTime)));
             }
             
-            stmt.setBoolean(7, isAllDay);
-            stmt.setString(8, reason);
+            stmt.setString(7, reason);
             
             int rowsAffected = stmt.executeUpdate();
             
@@ -75,7 +74,7 @@ public class DoctorUnavailabilityDAO {
      */
     public List<Map<String, Object>> getUnavailabilitiesByDoctor(String doctorId) {
         String sql = """
-            SELECT id, doctor_id, start_date, end_date, start_time, end_time, is_all_day, reason, created_at, updated_at
+            SELECT id, doctor_id, start_date, end_date, start_time, end_time, reason, created_at
             FROM doctor_unavailability
             WHERE doctor_id = ?
             ORDER BY start_date DESC, start_time DESC
@@ -101,10 +100,8 @@ public class DoctorUnavailabilityDAO {
                     unavailability.put("start_time", startTime != null ? startTime.toString() : null);
                     unavailability.put("end_time", endTime != null ? endTime.toString() : null);
                     
-                    unavailability.put("is_all_day", rs.getBoolean("is_all_day"));
                     unavailability.put("reason", rs.getString("reason"));
                     unavailability.put("created_at", rs.getTimestamp("created_at").toString());
-                    unavailability.put("updated_at", rs.getTimestamp("updated_at").toString());
                     
                     result.add(unavailability);
                 }
@@ -125,7 +122,7 @@ public class DoctorUnavailabilityDAO {
      */
     public List<Map<String, Object>> getAllUnavailabilities() {
         String sql = """
-            SELECT id, doctor_id, start_date, end_date, start_time, end_time, is_all_day, reason
+            SELECT id, doctor_id, start_date, end_date, start_time, end_time, reason
             FROM doctor_unavailability
             ORDER BY start_date DESC, start_time DESC
             """;
@@ -148,7 +145,6 @@ public class DoctorUnavailabilityDAO {
                 unavailability.put("start_time", startTime != null ? startTime.toString() : null);
                 unavailability.put("end_time", endTime != null ? endTime.toString() : null);
                 
-                unavailability.put("is_all_day", rs.getBoolean("is_all_day"));
                 unavailability.put("reason", rs.getString("reason"));
                 
                 result.add(unavailability);

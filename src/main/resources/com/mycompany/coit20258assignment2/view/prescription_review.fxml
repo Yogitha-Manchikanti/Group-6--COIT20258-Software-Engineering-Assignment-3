@@ -15,13 +15,13 @@
         <Label fx:id="message" text=""/>
     </HBox>
 
-    <Label text="Review / Approve / Refill Prescriptions" styleClass="title"/>
+    <Label text="Review / Approve / Reject Prescriptions" styleClass="title"/>
 
     <HBox spacing="12" alignment="CENTER" maxWidth="800">
         <Label text="Prescription ID:"/>
         <TextField fx:id="rxIdField" promptText="Select a row or paste ID" prefWidth="320"/>
         <Button text="Approve" onAction="#onApprove" styleClass="btn-accent"/>
-        <Button text="Refill"  onAction="#onRefill"  styleClass="btn-primary"/>
+        <Button text="Reject"  onAction="#onReject"  styleClass="btn-secondary"/>
     </HBox>
 
     <ListView fx:id="list" prefWidth="800" prefHeight="420"/>

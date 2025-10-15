@@ -2,7 +2,6 @@ package com.mycompany.coit20258assignment2;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Handles prescription requests and status changes.
@@ -17,13 +16,18 @@ public class PrescriptionService {
 
     /** Patient requests a prescription from a doctor. */
     public Prescription request(String patientId, String doctorId, String medication, String dosage) {
-        String id = "RX" + UUID.randomUUID().toString().substring(0, 8);
+        String id = generatePrescriptionId();
         Prescription p = new Prescription(id, patientId, doctorId, medication, dosage,
-                LocalDate.now(), PrescriptionStatus.ACTIVE);
+                LocalDate.now(), PrescriptionStatus.PENDING);
         var list = store.getPrescriptions();
         list.add(p);
         store.savePrescriptions(list);
         return p;
+    }
+    
+    /** Generate a short prescription ID in PRE### format */
+    private String generatePrescriptionId() {
+        return "PRE" + String.format("%03d", (int)(Math.random() * 1000));
     }
 
     /** Approve a prescription (doctor). */

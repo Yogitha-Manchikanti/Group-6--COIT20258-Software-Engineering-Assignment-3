@@ -85,6 +85,7 @@ public class SceneNavigator {
 
 
     public void goToAdminAppointments()    { go("admin_appointments.fxml"); }
+    public void goToAdminUsers()           { go("admin_users.fxml"); }
 
     public void goToHealthTips()           { go("health_tips.fxml"); }
     public void goToSignup()               { go("signup.fxml"); }

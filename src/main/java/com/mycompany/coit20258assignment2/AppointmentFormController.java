@@ -96,17 +96,17 @@ public class AppointmentFormController {
             
             // Check if date falls within unavailability period
             if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                Boolean isAllDay = (Boolean) unavail.get("is_all_day");
+                String startTimeStr = (String) unavail.get("start_time");
+                String endTimeStr = (String) unavail.get("end_time");
                 
-                if (isAllDay != null && isAllDay) {
+                // Check if this is an all-day unavailability (no specific times)
+                if (startTimeStr == null || endTimeStr == null) {
                     String reason = (String) unavail.get("reason");
                     message.setText("⚠️ Doctor unavailable: " + reason);
                     message.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
                     return;
                 } else {
                     // Check time range
-                    String startTimeStr = (String) unavail.get("start_time");
-                    String endTimeStr = (String) unavail.get("end_time");
                     
                     if (startTimeStr != null && endTimeStr != null) {
                         LocalTime startTime = LocalTime.parse(startTimeStr);
@@ -171,9 +171,11 @@ public class AppointmentFormController {
             
             // Check if date falls within unavailability period
             if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                Boolean isAllDay = (Boolean) unavail.get("is_all_day");
+                String startTimeStr = (String) unavail.get("start_time");
+                String endTimeStr = (String) unavail.get("end_time");
                 
-                if (isAllDay != null && isAllDay) {
+                // Check if this is an all-day unavailability (no specific times)
+                if (startTimeStr == null || endTimeStr == null) {
                     String reason = (String) unavail.get("reason");
                     message.setText("❌ Cannot book: Doctor is unavailable (" + reason + ")");
                     message.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
@@ -181,8 +183,6 @@ public class AppointmentFormController {
                 }
                 
                 // Check time range for partial day unavailability
-                String startTimeStr = (String) unavail.get("start_time");
-                String endTimeStr = (String) unavail.get("end_time");
                 
                 if (startTimeStr != null && endTimeStr != null) {
                     LocalTime startTime = LocalTime.parse(startTimeStr);
@@ -208,7 +208,7 @@ public class AppointmentFormController {
             
             // Create appointment object
             String apptId = "appt" + System.currentTimeMillis();
-            Appointment appt = new Appointment(apptId, Session.id(), doctorId, date, time, AppointmentStatus.BOOKED);
+            Appointment appt = new Appointment(apptId, Session.id(), doctorId, date, time, AppointmentStatus.SCHEDULED);
             
             System.out.println("🔄 Creating appointment on server...");
             System.out.println("   ID: " + apptId);

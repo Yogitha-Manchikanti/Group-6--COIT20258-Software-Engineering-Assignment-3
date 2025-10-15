@@ -24,7 +24,7 @@ public class AppointmentService {
         }
         
         String id = "AP" + UUID.randomUUID().toString().substring(0, 8);
-        Appointment a = new Appointment(id, patientId, doctorId, date, time, AppointmentStatus.BOOKED);
+        Appointment a = new Appointment(id, patientId, doctorId, date, time, AppointmentStatus.SCHEDULED);
         var list = store.getAppointments();
         list.add(a);
         store.saveAppointments(list);
@@ -47,7 +47,7 @@ public class AppointmentService {
         
         appt.setDate(newDate);
         appt.setTime(newTime);
-        appt.setStatus(AppointmentStatus.RESCHEDULED);
+        appt.setStatus(AppointmentStatus.CONFIRMED);
         store.saveAppointments(list);
     }
 

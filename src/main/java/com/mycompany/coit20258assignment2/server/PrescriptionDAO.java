@@ -179,10 +179,9 @@ public class PrescriptionDAO {
     public boolean requestRefill(String prescriptionId) {
         String sql = """
             UPDATE prescriptions 
-            SET refills_remaining = refills_remaining - 1, 
-                status = 'PENDING', 
+            SET status = 'PENDING', 
                 updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ? AND refills_remaining > 0
+            WHERE id = ? AND status = 'ACTIVE'
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -196,7 +195,7 @@ public class PrescriptionDAO {
                 System.out.println("✅ Refill requested for prescription: " + prescriptionId);
                 return true;
             } else {
-                System.out.println("⚠️ No refills remaining for prescription: " + prescriptionId);
+                System.out.println("⚠️ Prescription not found or not active: " + prescriptionId);
                 return false;
             }
             
@@ -209,14 +208,14 @@ public class PrescriptionDAO {
     
     /**
      * Approve refill (by doctor)
-     * Note: Database doesn't have refills_remaining column
-     * This updates the prescription's updated_at timestamp to indicate refill was processed
+     * Can approve PENDING refill requests or renew ACTIVE prescriptions
      */
     public boolean approveRefill(String prescriptionId) {
         String sql = """
             UPDATE prescriptions 
-            SET updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ? AND status = 'ACTIVE'
+            SET status = 'APPROVED', 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ? AND (status = 'PENDING' OR status = 'ACTIVE')
             """;
         
         try (Connection conn = dbManager.getConnection();
@@ -230,12 +229,47 @@ public class PrescriptionDAO {
                 System.out.println("✅ Refill approved for prescription: " + prescriptionId);
                 return true;
             } else {
-                System.out.println("⚠️ Prescription not found or not active: " + prescriptionId);
+                System.out.println("⚠️ Prescription not found: " + prescriptionId);
                 return false;
             }
             
         } catch (SQLException e) {
             System.err.println("Database error approving refill: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Reject refill (by doctor)
+     * Can reject PENDING refill requests or cancel ACTIVE prescriptions
+     */
+    public boolean rejectRefill(String prescriptionId) {
+        String sql = """
+            UPDATE prescriptions 
+            SET status = 'REJECTED', 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ? AND (status = 'PENDING' OR status = 'ACTIVE')
+            """;
+        
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, prescriptionId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("✅ Refill rejected for prescription: " + prescriptionId);
+                return true;
+            } else {
+                System.out.println("⚠️ Prescription not found: " + prescriptionId);
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Database error rejecting refill: " + e.getMessage());
             e.printStackTrace();
         }
         

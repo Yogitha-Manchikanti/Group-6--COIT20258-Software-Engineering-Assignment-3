@@ -7,12 +7,17 @@
 # Java Compiled Files
 # ====================
 *.class
-*.jar
+# *.jar        # JAR files normally ignored, but we need executable JARs for submission
 *.war
 *.ear
 *.zip
 *.tar.gz
 *.rar
+
+# Exception: Allow specific JAR files needed for submission
+!THS-Enhanced-Client.jar
+!THS-Enhanced-Server.jar
+!mysql-connector-j-8.0.33.jar
 
 # ====================
 # Maven

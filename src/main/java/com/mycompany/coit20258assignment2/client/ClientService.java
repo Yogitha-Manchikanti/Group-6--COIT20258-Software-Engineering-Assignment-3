@@ -375,6 +375,32 @@ public class ClientService {
     }
     
     /**
+     * Reject prescription refill request
+     */
+    public boolean rejectPrescriptionRefill(String prescriptionId) {
+        try {
+            System.out.println("Rejecting prescription refill: " + prescriptionId);
+            GenericRequest request = new GenericRequest("REJECT_PRESCRIPTION_REFILL", currentUser.getId());
+            request.addData("prescriptionId", prescriptionId);
+            
+            BaseResponse response = connection.sendRequest(request);
+            
+            if (response != null && response.isSuccess()) {
+                System.out.println("Prescription refill rejected successfully");
+                return true;
+            } else {
+                System.err.println("Failed to reject prescription refill");
+                return false;
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error rejecting prescription refill: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
      * Record vital signs
      */
     public boolean recordVitalSigns(VitalSigns vitals) {

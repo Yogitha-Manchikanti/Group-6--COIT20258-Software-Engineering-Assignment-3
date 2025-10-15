@@ -87,12 +87,11 @@ public class AdminAppointmentViewerController {
                 } else {
                     setText(item);
                     switch (item) {
-                        case "BOOKED":
                         case "CONFIRMED":
                         case "SCHEDULED":
                             setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
                             break;
-                        case "RESCHEDULED":
+                        case "NO_SHOW":
                             setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
                             break;
                         case "CANCELLED":

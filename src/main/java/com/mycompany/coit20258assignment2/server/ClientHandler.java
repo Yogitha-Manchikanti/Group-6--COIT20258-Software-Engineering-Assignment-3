@@ -119,6 +119,9 @@ public class ClientHandler implements Runnable {
                 case "REFILL_PRESCRIPTION":
                     response = handleRefillPrescription(request);
                     break;
+                case "REJECT_PRESCRIPTION_REFILL":
+                    response = handleRejectPrescriptionRefill(request);
+                    break;
                 case "RECORD_VITALS":
                     response = handleRecordVitals(request);
                     break;
@@ -413,9 +416,11 @@ public class ClientHandler implements Runnable {
             
             // Check if date falls within unavailability period
             if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                Boolean isAllDay = (Boolean) unavail.get("is_all_day");
+                String startTimeStr = (String) unavail.get("start_time");
+                String endTimeStr = (String) unavail.get("end_time");
                 
-                if (isAllDay != null && isAllDay) {
+                // Check if this is an all-day unavailability (no specific times)
+                if (startTimeStr == null || endTimeStr == null) {
                     String reason = (String) unavail.get("reason");
                     System.err.println("❌ Cannot create appointment: Doctor is unavailable (all day) - " + reason);
                     return new GenericResponse(
@@ -427,9 +432,6 @@ public class ClientHandler implements Runnable {
                 }
                 
                 // Check time range for partial day unavailability
-                String startTimeStr = (String) unavail.get("start_time");
-                String endTimeStr = (String) unavail.get("end_time");
-                
                 if (startTimeStr != null && endTimeStr != null) {
                     LocalTime startTime = LocalTime.parse(startTimeStr);
                     LocalTime endTime = LocalTime.parse(endTimeStr);
@@ -675,6 +677,29 @@ public class ClientHandler implements Runnable {
             "REFILL_PRESCRIPTION_RESPONSE", 
             success, 
             success ? "Prescription refilled successfully" : "Failed to refill prescription"
+        );
+    }
+    
+    private BaseResponse handleRejectPrescriptionRefill(BaseRequest request) {
+        System.out.println("Rejecting prescription refill");
+        
+        String prescriptionId = (String) request.getData().get("prescriptionId");
+        
+        System.out.println("   Prescription ID: " + prescriptionId);
+        
+        boolean success = prescriptionDAO.rejectRefill(prescriptionId);
+        
+        if (success) {
+            System.out.println("Prescription refill rejected successfully");
+        } else {
+            System.err.println("Failed to reject prescription refill");
+        }
+        
+        return new GenericResponse(
+            request.getRequestId(), 
+            "REJECT_PRESCRIPTION_REFILL_RESPONSE", 
+            success, 
+            success ? "Prescription refill rejected successfully" : "Failed to reject prescription refill"
         );
     }
     

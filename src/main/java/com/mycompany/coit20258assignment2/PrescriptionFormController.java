@@ -73,8 +73,8 @@ public class PrescriptionFormController {
                 return;
             }
 
-            // Create prescription object
-            String prescriptionId = "rx" + System.currentTimeMillis();
+            // Create prescription object with shorter ID
+            String prescriptionId = "PRE" + String.format("%03d", (int)(Math.random() * 1000));
             Prescription p = new Prescription(
                 prescriptionId,
                 pid,
@@ -82,7 +82,7 @@ public class PrescriptionFormController {
                 med,
                 dose,
                 LocalDate.now(),
-                PrescriptionStatus.ACTIVE  // Database default is ACTIVE
+                PrescriptionStatus.PENDING  // Prescription requests start as PENDING awaiting doctor approval
             );
 
             System.out.println("🔄 Creating prescription request on server...");

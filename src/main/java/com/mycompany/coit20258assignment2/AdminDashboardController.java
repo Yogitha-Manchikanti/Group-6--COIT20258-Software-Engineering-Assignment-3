@@ -21,6 +21,11 @@ public class AdminDashboardController {
     }
 
     @FXML 
+    public void onViewUsers() {
+        SceneNavigator.getInstance().goToAdminUsers();
+    }
+
+    @FXML 
     public void onLogout() {
         Session.logout();
         SceneNavigator.getInstance().goToLogin();

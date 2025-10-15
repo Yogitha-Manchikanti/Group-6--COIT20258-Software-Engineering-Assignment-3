@@ -8,7 +8,7 @@ import javafx.scene.control.*;
 import java.util.List;
 
 /**
- * Controller for doctors to view, approve, and refill prescriptions.
+ * Controller for doctors to view, approve, and reject prescriptions.
  * ASSIGNMENT 3: Server-only mode - loads prescriptions from database via TCP server
  */
 public class PrescriptionReviewController {
@@ -57,10 +57,14 @@ public class PrescriptionReviewController {
             return;
         }
 
-        List<String> rows = all.stream().map(p -> 
-            String.format("%s | Patient: %s | %s | %s",
-                    p.getId(), p.getPatientId(), p.getMedication(), p.getStatus())
-        ).toList();
+        List<String> rows = all.stream().map(p -> {
+            String patientName = findUserName(p.getPatientId());
+            return String.format("%s | Patient: %s | %s | %s",
+                    p.getId(), 
+                    patientName != null ? patientName : p.getPatientId(), 
+                    p.getMedication(), 
+                    p.getStatus());
+        }).toList();
 
         list.setItems(FXCollections.observableArrayList(rows));
         message.setText(all.size() + " prescription(s) found.");
@@ -82,15 +86,15 @@ public class PrescriptionReviewController {
         }
         
         try {
-            System.out.println("Approving prescription: " + id);
-            boolean success = clientService.updatePrescriptionStatus(id, PrescriptionStatus.ACTIVE);
+            System.out.println("Approving prescription refill: " + id);
+            boolean success = clientService.refillPrescription(id);
             
             if (success) {
-                message.setText("Approved " + id);
+                message.setText("Refill approved " + id);
                 message.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
                 refresh();
             } else {
-                message.setText("Failed to approve " + id);
+                message.setText("Failed to approve refill " + id);
                 message.setStyle("-fx-text-fill: red;");
             }
         } catch (Exception e) {
@@ -100,7 +104,7 @@ public class PrescriptionReviewController {
         }
     }
 
-    @FXML public void onRefill() {
+    @FXML public void onReject() {
         String id = rxIdField.getText().trim();
         if (id.isEmpty()) {
             message.setText("Enter prescription ID.");
@@ -115,15 +119,15 @@ public class PrescriptionReviewController {
         }
         
         try {
-            System.out.println("Refilling prescription: " + id);
-            boolean success = clientService.refillPrescription(id);
+            System.out.println("Rejecting prescription refill: " + id);
+            boolean success = clientService.rejectPrescriptionRefill(id);
             
             if (success) {
-                message.setText("Refilled " + id);
-                message.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+                message.setText("Refill rejected " + id);
+                message.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
                 refresh();
             } else {
-                message.setText("Failed to refill " + id);
+                message.setText("Failed to reject " + id);
                 message.setStyle("-fx-text-fill: red;");
             }
         } catch (Exception e) {
@@ -131,6 +135,23 @@ public class PrescriptionReviewController {
             message.setStyle("-fx-text-fill: red;");
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Find user name by ID from server
+     */
+    private String findUserName(String userId) {
+        try {
+            List<User> users = clientService.getUsers();
+            for (User user : users) {
+                if (user.getId().equals(userId)) {
+                    return user.getName();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error finding user name: " + e.getMessage());
+        }
+        return userId; // Return ID if name not found
     }
 
     @FXML public void onBack() { SceneNavigator.getInstance().goToDoctorDashboard(); }
