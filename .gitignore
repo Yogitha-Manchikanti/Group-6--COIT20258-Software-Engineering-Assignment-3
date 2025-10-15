@@ -23,6 +23,9 @@
 # Maven
 # ====================
 target/
+# But allow our executable JAR files in target directory
+!target/THS-Enhanced-Client.jar
+!target/THS-Enhanced-Server.jar
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

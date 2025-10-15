@@ -39,6 +39,8 @@ public class MyDataViewController {
             backBtn.setOnAction(e -> SceneNavigator.getInstance().goToPatientDashboard());
         } else if (Session.isDoctor()) {
             title.setText("My Data (Doctor)");
+            // Hide vital signs column for doctors
+            hideVitalSignsColumn();
             loadDoctorData(Session.id());
             backBtn.setOnAction(e -> SceneNavigator.getInstance().goToDoctorDashboard());
         } else {
@@ -247,6 +249,17 @@ public class MyDataViewController {
         
         message.setText(appts.size() + " appointments, " + rxs.size() + " prescriptions, " + 
                        diags.size() + " diagnoses, " + refs.size() + " referrals");
+    }
+
+    /**
+     * Hide the vital signs column for doctors since they don't need to see it
+     */
+    private void hideVitalSignsColumn() {
+        // Find the parent container of the vital signs list and hide it
+        if (vitalSignsList != null && vitalSignsList.getParent() != null) {
+            vitalSignsList.getParent().setVisible(false);
+            vitalSignsList.getParent().setManaged(false);
+        }
     }
 
     // ---- actions -----------------------------------------------------------

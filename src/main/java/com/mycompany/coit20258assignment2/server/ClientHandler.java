@@ -402,8 +402,8 @@ public class ClientHandler implements Runnable {
             unavailabilityDAO.getUnavailabilitiesByDoctor(doctorId);
         
         for (java.util.Map<String, Object> unavail : unavailabilities) {
-            String startDateStr = (String) unavail.get("start_date");
-            String endDateStr = (String) unavail.get("end_date");
+            String startDateStr = (String) unavail.get("startDate");
+            String endDateStr = (String) unavail.get("endDate");
             
             // Skip if dates are null
             if (startDateStr == null || endDateStr == null) {
@@ -416,11 +416,12 @@ public class ClientHandler implements Runnable {
             
             // Check if date falls within unavailability period
             if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                String startTimeStr = (String) unavail.get("start_time");
-                String endTimeStr = (String) unavail.get("end_time");
+                String startTimeStr = (String) unavail.get("startTime");
+                String endTimeStr = (String) unavail.get("endTime");
+                Boolean isAllDay = (Boolean) unavail.get("isAllDay");
                 
-                // Check if this is an all-day unavailability (no specific times)
-                if (startTimeStr == null || endTimeStr == null) {
+                // Check if this is an all-day unavailability
+                if (isAllDay != null && isAllDay) {
                     String reason = (String) unavail.get("reason");
                     System.err.println("❌ Cannot create appointment: Doctor is unavailable (all day) - " + reason);
                     return new GenericResponse(
@@ -484,7 +485,76 @@ public class ClientHandler implements Runnable {
         System.out.println("   New Time: " + newTime);
         System.out.println("   New Status: " + statusStr);
         
-        // Update both date/time AND status
+        // First, get the appointment details to retrieve the doctor ID
+        Optional<Appointment> appointmentOpt = appointmentDAO.getAppointmentById(appointmentId);
+        if (appointmentOpt.isEmpty()) {
+            return new GenericResponse(
+                request.getRequestId(),
+                "UPDATE_APPOINTMENT_RESPONSE",
+                false,
+                "Appointment not found: " + appointmentId
+            );
+        }
+        
+        Appointment appointment = appointmentOpt.get();
+        String doctorId = appointment.getDoctorId();
+        
+        // Check if doctor is available at the new date/time
+        DoctorUnavailabilityDAO unavailabilityDAO = new DoctorUnavailabilityDAO();
+        java.util.List<java.util.Map<String, Object>> unavailabilities = 
+            unavailabilityDAO.getUnavailabilitiesByDoctor(doctorId);
+        
+        for (java.util.Map<String, Object> unavail : unavailabilities) {
+            String startDateStr = (String) unavail.get("startDate");
+            String endDateStr = (String) unavail.get("endDate");
+            
+            // Skip if dates are null
+            if (startDateStr == null || endDateStr == null) {
+                System.err.println("⚠️ Skipping unavailability record with null dates");
+                continue;
+            }
+            
+            LocalDate startDate = LocalDate.parse(startDateStr);
+            LocalDate endDate = LocalDate.parse(endDateStr);
+            
+            // Check if new date falls within unavailability period
+            if (!newDate.isBefore(startDate) && !newDate.isAfter(endDate)) {
+                String startTimeStr = (String) unavail.get("startTime");
+                String endTimeStr = (String) unavail.get("endTime");
+                Boolean isAllDay = (Boolean) unavail.get("isAllDay");
+                
+                // Check if this is an all-day unavailability
+                if (isAllDay != null && isAllDay) {
+                    String reason = (String) unavail.get("reason");
+                    System.err.println("❌ Cannot reschedule appointment: Doctor is unavailable (all day) - " + reason);
+                    return new GenericResponse(
+                        request.getRequestId(),
+                        "UPDATE_APPOINTMENT_RESPONSE",
+                        false,
+                        "Cannot reschedule: Doctor is unavailable on " + newDate + " (" + reason + ")"
+                    );
+                }
+                
+                // Check time range for partial day unavailability
+                if (startTimeStr != null && endTimeStr != null) {
+                    LocalTime startTime = LocalTime.parse(startTimeStr);
+                    LocalTime endTime = LocalTime.parse(endTimeStr);
+                    
+                    if (!newTime.isBefore(startTime) && !newTime.isAfter(endTime)) {
+                        String reason = (String) unavail.get("reason");
+                        System.err.println("❌ Cannot reschedule appointment: Doctor is unavailable during time slot - " + reason);
+                        return new GenericResponse(
+                            request.getRequestId(),
+                            "UPDATE_APPOINTMENT_RESPONSE",
+                            false,
+                            "Cannot reschedule: Doctor is unavailable at " + newTime + " (" + reason + ")"
+                        );
+                    }
+                }
+            }
+        }
+        
+        // Doctor is available, proceed with updating appointment
         boolean success = appointmentDAO.updateAppointment(
             appointmentId, 
             newDate, 

@@ -76,15 +76,15 @@ public class AppointmentFormController {
         List<java.util.Map<String, Object>> unavailabilities = clientService.getAllUnavailabilities();
         
         for (java.util.Map<String, Object> unavail : unavailabilities) {
-            String unavailDoctorId = (String) unavail.get("doctor_id");
+            String unavailDoctorId = (String) unavail.get("doctorId");
             
-            // Skip if doctor_id is null or doesn't match
+            // Skip if doctorId is null or doesn't match
             if (unavailDoctorId == null || !unavailDoctorId.equals(doctorId)) {
                 continue;
             }
             
-            String startDateStr = (String) unavail.get("start_date");
-            String endDateStr = (String) unavail.get("end_date");
+            String startDateStr = (String) unavail.get("startDate");
+            String endDateStr = (String) unavail.get("endDate");
             
             // Skip if dates are null
             if (startDateStr == null || endDateStr == null) {
@@ -96,28 +96,26 @@ public class AppointmentFormController {
             
             // Check if date falls within unavailability period
             if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                String startTimeStr = (String) unavail.get("start_time");
-                String endTimeStr = (String) unavail.get("end_time");
+                String startTimeStr = (String) unavail.get("startTime");
+                String endTimeStr = (String) unavail.get("endTime");
+                Boolean isAllDay = (Boolean) unavail.get("isAllDay");
                 
-                // Check if this is an all-day unavailability (no specific times)
-                if (startTimeStr == null || endTimeStr == null) {
+                // Check if this is an all-day unavailability
+                if (isAllDay != null && isAllDay) {
                     String reason = (String) unavail.get("reason");
                     message.setText("⚠️ Doctor unavailable: " + reason);
                     message.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
                     return;
-                } else {
-                    // Check time range
+                } else if (startTimeStr != null && endTimeStr != null) {
+                    // Check time range for partial day unavailability
+                    LocalTime startTime = LocalTime.parse(startTimeStr);
+                    LocalTime endTime = LocalTime.parse(endTimeStr);
                     
-                    if (startTimeStr != null && endTimeStr != null) {
-                        LocalTime startTime = LocalTime.parse(startTimeStr);
-                        LocalTime endTime = LocalTime.parse(endTimeStr);
-                        
-                        if (!time.isBefore(startTime) && !time.isAfter(endTime)) {
-                            String reason = (String) unavail.get("reason");
-                            message.setText("⚠️ Doctor unavailable: " + reason);
-                            message.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
-                            return;
-                        }
+                    if (!time.isBefore(startTime) && !time.isAfter(endTime)) {
+                        String reason = (String) unavail.get("reason");
+                        message.setText("⚠️ Doctor unavailable: " + reason);
+                        message.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
+                        return;
                     }
                 }
             }
@@ -151,15 +149,15 @@ public class AppointmentFormController {
         // Check if doctor is available (server-side check)
         List<java.util.Map<String, Object>> unavailabilities = clientService.getAllUnavailabilities();
         for (java.util.Map<String, Object> unavail : unavailabilities) {
-            String unavailDoctorId = (String) unavail.get("doctor_id");
+            String unavailDoctorId = (String) unavail.get("doctorId");
             
-            // Skip if doctor_id is null or doesn't match
+            // Skip if doctorId is null or doesn't match
             if (unavailDoctorId == null || !unavailDoctorId.equals(doctorId)) {
                 continue;
             }
             
-            String startDateStr = (String) unavail.get("start_date");
-            String endDateStr = (String) unavail.get("end_date");
+            String startDateStr = (String) unavail.get("startDate");
+            String endDateStr = (String) unavail.get("endDate");
             
             // Skip if dates are null
             if (startDateStr == null || endDateStr == null) {
@@ -171,20 +169,18 @@ public class AppointmentFormController {
             
             // Check if date falls within unavailability period
             if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                String startTimeStr = (String) unavail.get("start_time");
-                String endTimeStr = (String) unavail.get("end_time");
+                String startTimeStr = (String) unavail.get("startTime");
+                String endTimeStr = (String) unavail.get("endTime");
+                Boolean isAllDay = (Boolean) unavail.get("isAllDay");
                 
-                // Check if this is an all-day unavailability (no specific times)
-                if (startTimeStr == null || endTimeStr == null) {
+                // Check if this is an all-day unavailability
+                if (isAllDay != null && isAllDay) {
                     String reason = (String) unavail.get("reason");
                     message.setText("❌ Cannot book: Doctor is unavailable (" + reason + ")");
                     message.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
                     return;
-                }
-                
-                // Check time range for partial day unavailability
-                
-                if (startTimeStr != null && endTimeStr != null) {
+                } else if (startTimeStr != null && endTimeStr != null) {
+                    // Check time range for partial day unavailability
                     LocalTime startTime = LocalTime.parse(startTimeStr);
                     LocalTime endTime = LocalTime.parse(endTimeStr);
                     

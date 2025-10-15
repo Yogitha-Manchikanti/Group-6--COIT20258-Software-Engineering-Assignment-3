@@ -91,17 +91,21 @@ public class DoctorUnavailabilityDAO {
                 while (rs.next()) {
                     Map<String, Object> unavailability = new HashMap<>();
                     unavailability.put("id", rs.getString("id"));
-                    unavailability.put("doctor_id", rs.getString("doctor_id"));
-                    unavailability.put("start_date", rs.getDate("start_date").toString());
-                    unavailability.put("end_date", rs.getDate("end_date").toString());
+                    unavailability.put("doctorId", rs.getString("doctor_id"));
+                    unavailability.put("startDate", rs.getDate("start_date").toString());
+                    unavailability.put("endDate", rs.getDate("end_date").toString());
                     
                     Time startTime = rs.getTime("start_time");
                     Time endTime = rs.getTime("end_time");
-                    unavailability.put("start_time", startTime != null ? startTime.toString() : null);
-                    unavailability.put("end_time", endTime != null ? endTime.toString() : null);
+                    unavailability.put("startTime", startTime != null ? startTime.toString() : null);
+                    unavailability.put("endTime", endTime != null ? endTime.toString() : null);
+                    
+                    // Determine if it's all day based on whether time fields are null
+                    boolean isAllDay = (startTime == null || endTime == null);
+                    unavailability.put("isAllDay", isAllDay);
                     
                     unavailability.put("reason", rs.getString("reason"));
-                    unavailability.put("created_at", rs.getTimestamp("created_at").toString());
+                    unavailability.put("createdAt", rs.getTimestamp("created_at").toString());
                     
                     result.add(unavailability);
                 }
@@ -136,14 +140,18 @@ public class DoctorUnavailabilityDAO {
             while (rs.next()) {
                 Map<String, Object> unavailability = new HashMap<>();
                 unavailability.put("id", rs.getString("id"));
-                unavailability.put("doctor_id", rs.getString("doctor_id"));
-                unavailability.put("start_date", rs.getDate("start_date").toString());
-                unavailability.put("end_date", rs.getDate("end_date").toString());
+                unavailability.put("doctorId", rs.getString("doctor_id"));
+                unavailability.put("startDate", rs.getDate("start_date").toString());
+                unavailability.put("endDate", rs.getDate("end_date").toString());
                 
                 Time startTime = rs.getTime("start_time");
                 Time endTime = rs.getTime("end_time");
-                unavailability.put("start_time", startTime != null ? startTime.toString() : null);
-                unavailability.put("end_time", endTime != null ? endTime.toString() : null);
+                unavailability.put("startTime", startTime != null ? startTime.toString() : null);
+                unavailability.put("endTime", endTime != null ? endTime.toString() : null);
+                
+                // Determine if it's all day based on whether time fields are null
+                boolean isAllDay = (startTime == null || endTime == null);
+                unavailability.put("isAllDay", isAllDay);
                 
                 unavailability.put("reason", rs.getString("reason"));
                 
