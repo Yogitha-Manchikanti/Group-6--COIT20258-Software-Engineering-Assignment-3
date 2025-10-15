@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mycompany.coit20258assignment2.PrescriptionFormController"
+      spacing="18" alignment="TOP_LEFT" prefWidth="1100" prefHeight="700"
+      styleClass="page-root">
+
+    <!-- Top Bar -->
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button text="← Back" onAction="#onBack" styleClass="btn-secondary"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Logout" onAction="#onLogout" styleClass="btn-logout"/>
+    </HBox>
+
+    <Label text="Request Prescription / Refill" styleClass="title"/>
+
+    <!-- Card -->
+    <VBox spacing="14" alignment="CENTER_LEFT" maxWidth="650" styleClass="card">
+        <GridPane hgap="14" vgap="14">
+            <columnConstraints>
+                <ColumnConstraints minWidth="180" halignment="RIGHT"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+
+            <!-- Doctor -->
+            <Label text="Select Doctor:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="doctorBox"
+                      promptText="Choose a doctor"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <!-- Medication -->
+            <Label text="Medication:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="medicationField"
+                       promptText="e.g., Amoxicillin"
+                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <!-- Dosage -->
+            <Label text="Dosage:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="dosageField"
+                       promptText="e.g., 500 mg twice daily"
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        </GridPane>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Label fx:id="message"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Submit Request" onAction="#onRequest" styleClass="btn-primary"/>
+        </HBox>
+    </VBox>
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+</VBox>
