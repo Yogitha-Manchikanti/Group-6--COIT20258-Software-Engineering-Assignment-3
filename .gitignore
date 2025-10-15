@@ -31,7 +31,7 @@ pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
-dependency-reduced-pom.xml
+# dependency-reduced-pom.xml  # Allow this file for submission
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
@@ -124,7 +124,7 @@ $RECYCLE.BIN/
 # Logs and Databases
 # ====================
 *.log
-*.sql
+# *.sql  # Allow SQL files for database setup
 *.sqlite
 *.db
 logs/
@@ -235,6 +235,10 @@ access.log
 !data/
 data/*
 !data/.gitkeep
+
+# Keep important project files for submission
+!setup_database.sql
+!dependency-reduced-pom.xml
 
 # ====================
 # Node modules (if any frontend)
