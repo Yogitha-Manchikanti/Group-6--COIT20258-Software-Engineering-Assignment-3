@@ -369,14 +369,14 @@ When login is successful, you'll see server logs in the server terminal:
 #### Doctors
 | Name | Email | Username | Password |
 |------|-------|----------|----------|
-| Dr. John Smith | john.smith@ths.com | john.smith | password123 |
-| Dr. Emily Davis | emily.davis@ths.com | emily.davis | password123 |
+| Dr. John Smith | sarah.johnson@ths.com | drjohnson | doctor123 |
+
 
 #### Patients
 | Name | Email | Username | Password |
 |------|-------|----------|----------|
-| Jane Doe | jane.doe@example.com | jane.doe | password123 |
-| Bob Johnson | bob.johnson@example.com | bob.johnson | password123 |
+| John Smith | john.smith@email.com | jsmith | patient123 |
+
 
 ### First-Time Setup
 
