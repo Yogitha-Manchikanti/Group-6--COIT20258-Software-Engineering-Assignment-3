@@ -188,6 +188,49 @@ private static final String DB_PASSWORD = "ths_pass";  // Change if needed
 3. Wait for dependencies to download (first time may take a few minutes)
 4. Look for **BUILD SUCCESS** in the Output window
 
+### Step 5: Build Executable JAR Files (Optional)
+
+To create the executable JAR files for deployment, use the following command:
+
+**Command Line Method (Recommended):**
+
+**For Windows with NetBeans:**
+```bash
+# Navigate to project directory
+cd Group-6--COIT20258-Software-Engineering-Assignment-3
+
+# Create JAR files using NetBeans Maven
+& "C:\Program Files\NetBeans-21\netbeans\java\maven\bin\mvn.cmd" clean package -DskipTests
+```
+
+**For systems with Maven in PATH:**
+```bash
+# Navigate to project directory
+cd Group-6--COIT20258-Software-Engineering-Assignment-3
+
+# Create JAR files using Maven
+mvn clean package -DskipTests
+```
+
+**Alternative: From NetBeans**
+1. Right-click on the project in the Projects panel
+2. Select **Clean and Build**
+3. JAR files will be created in the `target/` directory
+
+**Generated JAR Files:**
+- `target/THS-Enhanced-Server.jar` (~16MB) - Server application
+- `target/THS-Enhanced-Client.jar` (~16MB) - Client application
+- `target/dependency-reduced-pom.xml` - Maven shade plugin artifact
+
+**Verify JAR Creation:**
+```bash
+# Windows
+dir target\THS-Enhanced-*.jar
+
+# macOS/Linux
+ls -la target/THS-Enhanced-*.jar
+```
+
 ---
 
 ## ▶️ Running the Application
